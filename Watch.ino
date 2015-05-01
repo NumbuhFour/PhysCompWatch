@@ -27,8 +27,8 @@ Adafruit_NeoPixel pix = Adafruit_NeoPixel(NEO_COUNT, NEO_PIN, NEO_GRB + NEO_KHZ8
 Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(12345);
 
 // Calibration offsets
-float magxOffset = 2.55;
-float magyOffset = 27.95;
+float magxOffset = 20;//2.55;
+float magyOffset = 0;//27.95;
 
 uint32_t colors[NEO_COUNT];
 float ledStrength = 0.05;
@@ -143,7 +143,6 @@ void setup() {
   startupFlash();
   Serial.println("Startup complete.");
 }
-uint32_t compassTimer = millis();
 
 void loop() {
   checkButtons();
@@ -399,9 +398,9 @@ void compassCheck() {
     float heading = (atan2(event.magnetic.y + magyOffset,event.magnetic.x + magxOffset) * 180) / Pi;
 
   Serial.print("Compass: x");
-  Serial.print(event.magnetic.x);
+  Serial.print(event.magnetic.x+magxOffset);
   Serial.print(" y");
-  Serial.print(event.magnetic.y);
+  Serial.print(event.magnetic.y+magyOffset);
     // Normalize to 0-360
     if (heading < 0)
     {
@@ -411,13 +410,26 @@ void compassCheck() {
   //}  
 }  
 
+
+int cali = 200;
 void compassDirection(int compassHeading) 
 {
   Serial.print(" Direction: ");
-  Serial.println(compassHeading);
+  Serial.print(compassHeading);
+  Serial.print(" Calibration: ");
+  Serial.print(cali);
+  Serial.print(" Doop: ");
+  Serial.println(compassHeading + cali);
   
-  compassHeading -= 70; //Calibration;
+  if(btn1rel){
+    cali += 10;
+  }else if(btn2rel){
+    cali -= 10;
+  }
+  
+  compassHeading += cali; //Calibration;
   if(compassHeading>=360) compassHeading -= 360;
+  if(compassHeading< 0) compassHeading += 360;
   clearColors();
 
   unsigned int ledDir = 2;
@@ -431,12 +443,14 @@ void compassDirection(int compassHeading)
       return;
   }
   
-  ledDir = compassHeading / 20;
+  ledDir = compassHeading / 25;
   
   if(ledDir >= NEO_COUNT){
     Serial.print("LED ERROR ");
     Serial.println(ledDir);
-    setColors(127, 255,0,0);
+    setColor(0, 255,0,0);
+    setColor(6, 255,0,0);
+    //setColors(127, 255,0,0);
     return;
   }
   setColor(ledDir, 255, 255, 255);
@@ -642,6 +656,9 @@ void setBrightnessState(){
     setColor(0, 255,0,0);
     setColor(3, 0,255,0);
     setColor(6, 0,0,255);
+    
+    if(ledStrength < 0.05) ledStrength = 0.05;
+    if(ledStrength > 1) ledStrength = 1;
   }
 }
 
@@ -687,3 +704,4 @@ void autoLightLevel(){
   if(light > 1) light = 1;
   ledStrength = light;
 }
+
