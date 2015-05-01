@@ -602,18 +602,29 @@ void clockState(){
   bool isam = isAM();
   byte mins = minute();
   
-  if(second()%2 == 0) setColor(2, 0,0,0);
-  else if(isam) setColor(2, 200,255,0);
-  else setColor(2, 255,50,0);
-  
-  setColors(120, 0,0,0); //hour background
-  setColors(3, 0,0,0); //minute background
-  
-  hours = hours << 3;
-  setColors(hours, 0,255,0);
-  
-  mins = mins/15;
-  setColors(mins, 0,0,255);
+  if(btn2){ //Show minutes detail if b2 is pressed
+    clearColors();
+    setColors(63, 0,45,30); //minute background
+    setColors(mins, 0,0,255);
+    
+    if(second()%2 == 0) setColor(6, 0,0,0); //AMPM because a light is not used
+    else if(isam) setColor(6, 200,255,0);
+    else setColor(6, 255,50,0);
+    
+  }else{ //Otherwise show full time
+    if(second()%2 == 0) setColor(2, 0,0,0);
+    else if(isam) setColor(2, 200,255,0);
+    else setColor(2, 255,50,0);
+    
+    setColors(120, 0,0,0); //hour background
+    setColors(3, 0,0,0); //minute background
+    
+    hours = hours << 3;
+    setColors(hours, 0,255,0);
+    
+    mins = mins/15;
+    setColors(mins, 0,0,255);
+  }
 }
 
 void setBrightnessState(){
