@@ -153,7 +153,7 @@ void loop() {
     configHoldCounter = 0;
   }
   
-  if(configHoldCounter >= 1000 && state != -1){// Config accessed!
+  if(configHoldCounter >= 600 && state != -1){// Config accessed!
     setColors(85,255,0,0);
     setColors(42,240,255,0);
     pushColors();
