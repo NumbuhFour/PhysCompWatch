@@ -66,25 +66,51 @@ long CONFIGVAR_START;
 
 wl wearLeveling(&writer, &reader);
 
+#include <SoftwareSerial.h>  
+SoftwareSerial bluetooth(7, 8);
 void setup() {
-  Serial.begin(9600);
-  // put your setup code here, to run once:
-  for(byte i = 0; i < NEO_COUNT; i++) colors[0] = pix.Color(0,0,0);
-  
   pinMode(BTN1_PIN, INPUT);
   pinMode(BTN2_PIN, INPUT);
   pinMode(MOTOR_PIN, OUTPUT);
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH); //Power notifier
   
+  Serial.begin(9600);
+  bluetooth.begin(115200);
+  bluetooth.print("$");
+  bluetooth.print("$");
+  bluetooth.print("$");
+  delay(100);
+  bluetooth.println("U,9600,N");
+  bluetooth.begin(9600);  // Start bluetooth serial at 9600
+  /*bluetooth.begin(115200);  // The Bluetooth Mate defaults to 115200bps
+  bluetooth.print("$");  // Print three times individually
+  bluetooth.print("$");
+  bluetooth.print("$");  // Enter command mode
+  delay(100);  // Short delay, wait for the Mate to send back CMD
+  bluetooth.println("U,9600,N");  // Temporarily Change the baudrate to 9600, no parity
+  // 115200 can be too fast at times for NewSoftSerial to relay the data reliably
+  bluetooth.begin(9600);*/  // Start bluetooth serial at 9600
+  //while(!Serial); //Wait for serial to get ready?
+  //Serial.print("$");  // Print three times individually
+  //Serial.print("$");
+  //Serial.print("$");  // Enter command mode
+  //delay(100);  // Short delay, wait for the Mate to send back CMD
+  //Serial.println("U,9600,N");  // Temporarily Change the baudrate to 9600, no parity
+  // 115200 can be too fast at times for NewSoftSerial to relay the data reliably
+  //Serial.begin(9600);  // Start bluetooth serial at 9600
+  
+  for(byte i = 0; i < NEO_COUNT; i++) colors[0] = pix.Color(0,0,0);
+  
+  
   pix.begin();
   pix.show(); // Initialize all pixels to 'off'
   
   
   /* Initialise the sensor */
-  if(!mag.begin())
+ /* if(!mag.begin())
   {
-    /* There was a problem detecting the LSM303 ... check your connections */
+    // There was a problem detecting the LSM303 ... check your connections 
     Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
     
     while(1){
@@ -95,13 +121,13 @@ void setup() {
       pushColors();
       delay(500);
     }
-  }
+  }*/
   
   //Loading EEPROM data
   
   TIMEEEVAR_START = DATA_START;
   if(wearLeveling.exists(TIMEEEVAR_START) == WL_NOK){
-    Serial.println("Time var does not exist");
+    //Serial.println("Time var does not exist");
     //Create it at timeEEVar_Start position with WL_XX length where XX is status length 8,16,24,32,64
     wearLeveling.create(TIMEEEVAR_START, WL_16, sizeof(_timeEEVar));
     wearLeveling.clear();
@@ -112,20 +138,20 @@ void setup() {
     wearLeveling.open(TIMEEEVAR_START);
     wearLeveling.writeRec(WL_REC _timeEEVar);
   }else{
-    Serial.println("Time var exists.");
+    //Serial.println("Time var exists.");
     wearLeveling.open(TIMEEEVAR_START);
     wearLeveling.readRec(WL_REC _timeEEVar);
     
-    Serial.print("Time set to ");
-    Serial.print(_timeEEVar.hours);
-    Serial.print(":");
-    Serial.println(_timeEEVar.mins);
+    //Serial.print("Time set to ");
+    //Serial.print(_timeEEVar.hours);
+    //Serial.print(":");
+    //Serial.println(_timeEEVar.mins);
     setTime(_timeEEVar.hours, _timeEEVar.mins,0,0,0,0);
   }
   
   CONFIGVAR_START = TIMEEEVAR_START + wearLeveling.memSize();
   if(wearLeveling.exists(CONFIGVAR_START)==WL_NOK){
-    Serial.println("configVar does not exist");
+    //Serial.println("configVar does not exist");
     wearLeveling.create(CONFIGVAR_START, WL_8, sizeof(configFlags));
     wearLeveling.clear();
     
@@ -133,7 +159,7 @@ void setup() {
     wearLeveling.open(CONFIGVAR_START);
     wearLeveling.writeRec(WL_REC configFlags); 
   }else{
-    Serial.println("Config var exists");
+    //Serial.println("Config var exists");
     wearLeveling.open(CONFIGVAR_START);
     wearLeveling.readRec(WL_REC configFlags);
   }
@@ -141,7 +167,7 @@ void setup() {
   lastMin = minute();
   
   startupFlash();
-  Serial.println("Startup complete.");
+  //Serial.println("Startup complete.");
 }
 
 void loop() {
@@ -176,13 +202,13 @@ void loop() {
     configHoldCounter = 0;
     buttonsReleased = false;
     
-    Serial.println("State picker accessed.");
+    //Serial.println("State picker accessed.");
     setState(-1);
     
   }
   
-  loopDaemons();
   loopState();
+  loopDaemons();
     
   byte mins = minute();
   if(lastMin != mins){
@@ -212,10 +238,10 @@ byte reader(unsigned long address){
 void writeClockToEEPROM(){
   _timeEEVar.hours = hour();
   _timeEEVar.mins = minute();
-  Serial.print("Writing time to EEPROM ");
-  Serial.print(_timeEEVar.hours);
-  Serial.print(":");
-  Serial.println(_timeEEVar.mins);
+  //Serial.print("Writing time to EEPROM ");
+  //Serial.print(_timeEEVar.hours);
+  //Serial.print(":");
+  //Serial.println(_timeEEVar.mins);
   wearLeveling.open(TIMEEEVAR_START);
   wearLeveling.writeRec(WL_REC _timeEEVar);
 }
@@ -252,6 +278,7 @@ void pushColors(){
 
 void loopDaemons(){
   autoLightLevel();
+  checkBluetooth();
 }
 
 void loopState(){
@@ -397,10 +424,10 @@ void compassCheck() {
     // Calculate the angle of the vector y,x
     float heading = (atan2(event.magnetic.y + magyOffset,event.magnetic.x + magxOffset) * 180) / Pi;
 
-  Serial.print("Compass: x");
-  Serial.print(event.magnetic.x+magxOffset);
-  Serial.print(" y");
-  Serial.print(event.magnetic.y+magyOffset);
+  //Serial.print("Compass: x");
+  //Serial.print(event.magnetic.x+magxOffset);
+  //Serial.print(" y");
+  //Serial.print(event.magnetic.y+magyOffset);
     // Normalize to 0-360
     if (heading < 0)
     {
@@ -414,12 +441,12 @@ void compassCheck() {
 int cali = 200;
 void compassDirection(int compassHeading) 
 {
-  Serial.print(" Direction: ");
+  /*Serial.print(" Direction: ");
   Serial.print(compassHeading);
   Serial.print(" Calibration: ");
   Serial.print(cali);
   Serial.print(" Doop: ");
-  Serial.println(compassHeading + cali);
+  Serial.println(compassHeading + cali);*/
   
   if(btn1rel){
     cali += 10;
@@ -446,8 +473,8 @@ void compassDirection(int compassHeading)
   ledDir = compassHeading / 25;
   
   if(ledDir >= NEO_COUNT){
-    Serial.print("LED ERROR ");
-    Serial.println(ledDir);
+    /*Serial.print("LED ERROR ");
+    Serial.println(ledDir);*/
     setColor(0, 255,0,0);
     setColor(6, 255,0,0);
     //setColors(127, 255,0,0);
@@ -468,8 +495,8 @@ void setState(int s){
   clearColors();
   btn1rel = btn2rel = false;
   analogWrite(MOTOR_PIN,0);
-  Serial.print("State changed to ");
-  Serial.println(s);
+  /*Serial.print("State changed to ");
+  Serial.println(s);*/
   
   while(btn1 || btn2) {
     checkButtons(); 
@@ -703,5 +730,51 @@ void autoLightLevel(){
   if(light < 0.05) light = 0.05;
   if(light > 1) light = 1;
   ledStrength = light;
+}
+
+String msgBuild = "";
+void checkBluetooth(){
+  while(bluetooth.available()>0){
+    setColor(0, 0,255,255);
+    pushColors();
+    //delay(1000);
+    char c = (char)Serial.read();
+    Serial.print(c);
+    Serial.write('#');
+    if(c == ';'){
+      handleMessage(msgBuild);
+      msgBuild = "";
+    }else{
+      msgBuild.concat(c);
+//      msgBuild += c;
+    }
+  }
+}
+
+void handleMessage(String msg){
+  confirmFlash();
+  if(msg.startsWith("TIM=")){
+    Serial.print("TIME");
+    int dot = msg.indexOf(".");
+    int h = msg.substring(4,dot).toInt();
+    int m = msg.substring(dot+1).toInt();
+    
+    setTime(h,m, 0,0,0,0);
+    Serial.print("Time set to ");
+    Serial.print(h);
+    Serial.print(":");
+    Serial.println(m);
+  }else if(msg.startsWith("ALR")){
+    Serial.println("ALARM!!!!");
+  }else if(msg.startsWith("SMS")){
+    Serial.println("SMS!!!");
+  }
+  bluetooth.print("Thanks! ");
+  bluetooth.println(msg);
+  Serial.print("$");
+  Serial.print("$");
+  Serial.print("$");
+  Serial.println("D,");
+  Serial.println("---");
 }
 
