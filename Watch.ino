@@ -67,7 +67,8 @@ long CONFIGVAR_START;
 wl wearLeveling(&writer, &reader);
 
 #include <SoftwareSerial.h>  
-SoftwareSerial bluetooth(7, 8);
+SoftwareSerial fakeSerial(7,8); //tx.rx
+//SoftwareSerial bluetooth(7, 8);
 void setup() {
   pinMode(BTN1_PIN, INPUT);
   pinMode(BTN2_PIN, INPUT);
@@ -75,14 +76,9 @@ void setup() {
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH); //Power notifier
   
-  Serial.begin(9600);
-  bluetooth.begin(115200);
-  bluetooth.print("$");
-  bluetooth.print("$");
-  bluetooth.print("$");
-  delay(100);
-  bluetooth.println("U,9600,N");
-  bluetooth.begin(9600);  // Start bluetooth serial at 9600
+  fakeSerial.begin(9600);
+  
+  Serial.begin(115200);
   /*bluetooth.begin(115200);  // The Bluetooth Mate defaults to 115200bps
   bluetooth.print("$");  // Print three times individually
   bluetooth.print("$");
@@ -734,11 +730,14 @@ void autoLightLevel(){
 
 String msgBuild = "";
 void checkBluetooth(){
-  while(bluetooth.available()>0){
+  fakeSerial.println("Checky");
+  while(Serial.available()>0){
     setColor(0, 0,255,255);
     pushColors();
     //delay(1000);
     char c = (char)Serial.read();
+    fakeSerial.print(c);
+    fakeSerial.print('#');
     Serial.print(c);
     Serial.write('#');
     if(c == ';'){
@@ -769,12 +768,7 @@ void handleMessage(String msg){
   }else if(msg.startsWith("SMS")){
     Serial.println("SMS!!!");
   }
-  bluetooth.print("Thanks! ");
-  bluetooth.println(msg);
-  Serial.print("$");
-  Serial.print("$");
-  Serial.print("$");
-  Serial.println("D,");
-  Serial.println("---");
+  Serial.print("Thanks! ");
+  Serial.println(msg);
 }
 
