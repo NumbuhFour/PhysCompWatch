@@ -16,7 +16,7 @@
 
 #define PHOTO_PIN   0
 
-#define STATES      8
+#define STATES      9
 #define CLOCK_STATE 0
 
 #define DATA_START 32
@@ -55,6 +55,8 @@ int compassReading;
 
 byte lastMin = 0;
 
+bool messageWaiting = false;
+
 struct timeEEVar{
   byte hours;
   byte mins;
@@ -68,7 +70,7 @@ wl wearLeveling(&writer, &reader);
 
 #include <SoftwareSerial.h>  
 SoftwareSerial fakeSerial(7,8); //tx.rx
-//SoftwareSerial bluetooth(7, 8);
+//SoftwareSerial bluetooth(0, 1);
 void setup() {
   pinMode(BTN1_PIN, INPUT);
   pinMode(BTN2_PIN, INPUT);
@@ -78,7 +80,13 @@ void setup() {
   
   fakeSerial.begin(9600);
   
-  Serial.begin(115200);
+  Serial.begin(115200); // The Bluetooth Mate defaults to 115200bps
+  Serial.print("$");  // Print three times individually
+  Serial.print("$");
+  Serial.print("$");  // Enter command mode
+  delay(1000);  // Short delay, wait for the Mate to send back CMD
+  Serial.println("U,9600,N");
+  Serial.begin(9600);
   /*bluetooth.begin(115200);  // The Bluetooth Mate defaults to 115200bps
   bluetooth.print("$");  // Print three times individually
   bluetooth.print("$");
@@ -104,7 +112,7 @@ void setup() {
   
   
   /* Initialise the sensor */
- /* if(!mag.begin())
+  if(!mag.begin())
   {
     // There was a problem detecting the LSM303 ... check your connections 
     Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
@@ -117,7 +125,7 @@ void setup() {
       pushColors();
       delay(500);
     }
-  }*/
+  }
   
   //Loading EEPROM data
   
@@ -288,6 +296,7 @@ void loopState(){
     case 5: setTimeState(); break;
     case 6: setBrightnessState(); break;
     case 7: buttonPlay(); break;
+    case 8: alarmState(); break;
     default:
       state = CLOCK_STATE;
       break;
@@ -705,6 +714,26 @@ void configState(){
   }
 }
 
+void alarmState(){
+  uint16_t i;
+  for(byte i=0; i< NEO_COUNT; i++) {
+    setColor(i, Wheel(((i * 256 / NEO_COUNT) + genNum) & 255));
+  }
+  genNum += 20;
+  if(genNum>256*5) genNum=0;
+  
+  int mil = millis();
+  if(mil%3000 < 1500){
+    if(mil%330 < 100){
+     analogWrite(MOTOR_PIN, 1023);
+    }else{
+     analogWrite(MOTOR_PIN, 0);
+    } 
+  }else{
+     analogWrite(MOTOR_PIN, 0);
+  }
+}
+
 /************************************************** DAEMONS **************************************************/
 
 float lastLightLevel[3];
@@ -753,20 +782,22 @@ void checkBluetooth(){
 void handleMessage(String msg){
   confirmFlash();
   if(msg.startsWith("TIM=")){
-    Serial.print("TIME");
+    //Serial.print("TIME");
     int dot = msg.indexOf(".");
     int h = msg.substring(4,dot).toInt();
     int m = msg.substring(dot+1).toInt();
     
     setTime(h,m, 0,0,0,0);
-    Serial.print("Time set to ");
-    Serial.print(h);
-    Serial.print(":");
-    Serial.println(m);
+    //Serial.print("Time set to ");
+    //Serial.print(h);
+    //Serial.print(":");
+    //Serial.println(m);
   }else if(msg.startsWith("ALR")){
-    Serial.println("ALARM!!!!");
+    //Serial.println("ALARM!!!!");
+    setState(8);
   }else if(msg.startsWith("SMS")){
     Serial.println("SMS!!!");
+    messageWaiting = true;
   }
   Serial.print("Thanks! ");
   Serial.println(msg);
