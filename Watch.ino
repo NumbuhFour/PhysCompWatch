@@ -19,6 +19,7 @@
 #define STATES      9
 #define CLOCK_STATE 0
 #define ALARM_STATE 64
+#define ANDROID_STATE 63
 
 #define DATA_START 32
 
@@ -203,20 +204,7 @@ void loop() {
     setColors(42,240,255,0);
     pushColors();
     
-    analogWrite(MOTOR_PIN, 1023);
-    delay(100);
-    analogWrite(MOTOR_PIN, 0);
-    delay(50);
-    
-    analogWrite(MOTOR_PIN, 1023);
-    delay(100);
-    analogWrite(MOTOR_PIN, 0);
-    delay(50);
-    
-    analogWrite(MOTOR_PIN, 1023);
-    delay(100);
-    analogWrite(MOTOR_PIN, 0);
-    delay(50);
+    pulseMotorRepeat(1023, 100,50,3);
     
     configHoldCounter = 0;
     buttonsReleased = false;
@@ -230,18 +218,14 @@ void loop() {
   
   loopState();
   
-  if(batteryLevel < 0.2 && (configFlags & CONFIG_BATTWARN)==1 && millis()%4000 < 1000){
+  if(batteryLevel < 0.2 && (configFlags & CONFIG_BATTWARN)==CONFIG_BATTWARN && millis()%4000 < 1000){
     displayBatteryColors();
     pushColors();
     
-    analogWrite(MOTOR_PIN, 1023);
-    delay(200);
-    analogWrite(MOTOR_PIN, 0);
+    pulseMotor(1023, 200);
     delay(50);
     
-    analogWrite(MOTOR_PIN, 1023);
-    delay(700);
-    analogWrite(MOTOR_PIN, 0);
+    pulseMotor(1023, 700);
     delay(300);
     
   }else if(messageWaiting && millis()%4000 < 1000){
@@ -335,6 +319,7 @@ void loopState(){
     case 8: buttonPlay(); break;
     
     case ALARM_STATE: alarmState(); break;//Over statecount, ignored by state chooser.
+    case ANDROID_STATE: androidState(); break;//Over statecount, ignored by state chooser.
     default:
       state = CLOCK_STATE;
       break;
@@ -389,13 +374,7 @@ void startupFlash(){
  delay(80);
  setColor(NEO_COUNT-1, 0,0,0);
  pushColors();
- analogWrite(MOTOR_PIN, 1023);
- delay(150);
- analogWrite(MOTOR_PIN, 0);
- delay(100);
- analogWrite(MOTOR_PIN, 1023);
- delay(150);
- analogWrite(MOTOR_PIN, 0);
+ pulseMotorRepeat(1023,150,100,2);
 }
 
 void errorFlash(){
@@ -424,9 +403,7 @@ void confirmFlash(){
     clearColors();
     setColors(42,0,255,0);
     pushColors();
-    analogWrite(MOTOR_PIN,1023);
-    delay(150);
-    analogWrite(MOTOR_PIN,0);
+    pulseMotor(1023, 150);
     delay(50);
 }
 
@@ -434,17 +411,8 @@ void messageFlash(){
   for(byte i = 0; i < NEO_COUNT; i++)
     setColor(i, Wheel(((i * 256 / NEO_COUNT) + 5) & 255));
   pushColors();
-  analogWrite(MOTOR_PIN,1023);
-  delay(150);
-  analogWrite(MOTOR_PIN,0);
-  delay(50);
-  analogWrite(MOTOR_PIN,1023);
-  delay(150);
-  analogWrite(MOTOR_PIN,0);
-  delay(50);
-  analogWrite(MOTOR_PIN,1023);
-  delay(250);
-  analogWrite(MOTOR_PIN,0);
+  pulseMotorRepeat(1023,150,50,2);
+  pulseMotor(1023, 250);
   delay(50);
     
 }
@@ -467,6 +435,18 @@ void displayBatteryColors(){
   }
   //Serial.print("BATTERY ");
   //Serial.println(batt);
+}
+
+void pulseMotor(int strength, int length){
+  analogWrite(MOTOR_PIN, strength);
+  delay(length);
+  analogWrite(MOTOR_PIN, 0);
+}
+void pulseMotorRepeat(int strength, int length, int del, int count){
+  for(int i = 0; i < count; i++){
+    pulseMotor(strength,length);
+    delay(del);
+  }
 }
 
 // Input a value 0 to 255 to get a color value.
@@ -579,6 +559,10 @@ int genNum = 0;
 
 //NOT A STATE. Defined here for access to state globals
 void setState(int s){
+  if(state == ANDROID_STATE && s != ANDROID_STATE){ //Leaving arduino state
+    Serial.println("LEAV");
+  }
+  
   genNum = 0;
   state = s;
   clearColors();
@@ -823,12 +807,17 @@ void showBatteryState(){
   displayBatteryColors();
 }
 
+void androidState(){
+  if(btn1rel) Serial.println("btn1");
+  if(btn2rel) Serial.println("btn2");
+}
+
 /************************************************** DAEMONS **************************************************/
 
 float lastLightLevel[3];
 byte lastLightLevelIndex = 0;
 void autoLightLevel(){
-  if((configFlags & CONFIG_LIGHTLEVEL) != 1) 
+  if((configFlags & CONFIG_LIGHTLEVEL) != CONFIG_LIGHTLEVEL) 
     return; //Auto light level disabled
   
   float light = checkLightLevel();
@@ -868,8 +857,12 @@ void checkBluetooth(){
 }
 
 void handleMessage(String msg){
-  if(configFlags & CONFIG_BLUETOOTH == 1){
-    confirmFlash();
+  Serial.print("CONFIG ");
+  Serial.print(configFlags);
+  Serial.print(" ");
+  Serial.println(configFlags&CONFIG_BLUETOOTH);
+  if(configFlags & CONFIG_BLUETOOTH == CONFIG_BLUETOOTH){
+    //confirmFlash();
     if(msg.startsWith("TIM=")){
       //Serial.print("TIME");
       int dot = msg.indexOf(".");
@@ -890,6 +883,10 @@ void handleMessage(String msg){
       messageFlash();
     }else if(msg.startsWith("AST")){
       if(state == ALARM_STATE) setState(CLOCK_STATE);
+    }else if(msg.startsWith("AND")){
+      if(state != ANDROID_STATE) setState(ANDROID_STATE);
+    }else if(state == ANDROID_STATE){
+      
     }
   }
   Serial.print("Thanks! ");
