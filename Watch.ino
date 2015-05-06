@@ -211,7 +211,14 @@ void loop() {
     
   }
   
+  if(btn1 || btn2) messageWaiting = false;
+  
   loopState();
+  
+  if(messageWaiting && millis()%4000 < 1000){
+    messageFlash();
+  }
+  
   loopDaemons();
     
   byte mins = minute();
@@ -383,6 +390,25 @@ void confirmFlash(){
     delay(150);
     analogWrite(MOTOR_PIN,0);
     delay(50);
+}
+
+void messageFlash(){
+  for(byte i = 0; i < NEO_COUNT; i++)
+    setColor(i, Wheel(((i * 256 / NEO_COUNT) + 5) & 255));
+  pushColors();
+  analogWrite(MOTOR_PIN,1023);
+  delay(150);
+  analogWrite(MOTOR_PIN,0);
+  delay(50);
+  analogWrite(MOTOR_PIN,1023);
+  delay(150);
+  analogWrite(MOTOR_PIN,0);
+  delay(50);
+  analogWrite(MOTOR_PIN,1023);
+  delay(250);
+  analogWrite(MOTOR_PIN,0);
+  delay(50);
+    
 }
 
 // Input a value 0 to 255 to get a color value.
@@ -722,15 +748,16 @@ void alarmState(){
   genNum += 20;
   if(genNum>256*5) genNum=0;
   
-  int mil = millis();
-  if(mil%3000 < 1500){
-    if(mil%330 < 100){
+  unsigned long mil = millis();
+  if(mil%7000 < 5000 && (mil%7000)%2000 < 1000){
      analogWrite(MOTOR_PIN, 1023);
-    }else{
-     analogWrite(MOTOR_PIN, 0);
-    } 
   }else{
      analogWrite(MOTOR_PIN, 0);
+  }
+  
+  if(btn1 && btn2){
+    Serial.print("ALSTP");
+    setState(CLOCK_STATE);
   }
 }
 
@@ -759,7 +786,7 @@ void autoLightLevel(){
 
 String msgBuild = "";
 void checkBluetooth(){
-  fakeSerial.println("Checky");
+//  fakeSerial.println("Checky");
   while(Serial.available()>0){
     setColor(0, 0,255,255);
     pushColors();
@@ -798,6 +825,9 @@ void handleMessage(String msg){
   }else if(msg.startsWith("SMS")){
     Serial.println("SMS!!!");
     messageWaiting = true;
+    messageFlash();
+  }else if(msg.startsWith("AST")){
+    if(state == 8) setState(CLOCK_STATE);
   }
   Serial.print("Thanks! ");
   Serial.println(msg);
