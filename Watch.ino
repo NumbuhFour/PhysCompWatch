@@ -5,26 +5,36 @@
 #include <Time.h>
 #include <EEPROM.h>
 #include <wl.h>
+#include <Vcc.h>
 
-#define NEO_PIN    12
 #define NEO_COUNT   7
 
+#define NEO_PIN    12
 #define BTN1_PIN   16 //Left button
 #define BTN2_PIN    3  //Right button
-
 #define MOTOR_PIN  10 //Vibration motor
-
 #define PHOTO_PIN   0
+#define PIEZO_PIN   6
 
 #define STATES      9
 #define CLOCK_STATE 0
+#define ALARM_STATE 64
 
 #define DATA_START 32
 
-#define CONFIG_LIGHTLEVEL 1
+#define CONFIG_LIGHTLEVEL 1 //Light level auto-changes
+#define CONFIG_BLUETOOTH  2 //Pay attention to bluetooth messages
+#define CONFIG_BATTWARN   4 //Warn when battery low
+
+#define VCCMIN   0.0           // Minimum expected Vcc level, in Volts.
+#define VCCMAX   5.0           // Maximum expected Vcc level, in Volts.
+#define VCCCORR  1.0           // Measured Vcc by multimeter divided by reported Vcc
+
 
 Adafruit_NeoPixel pix = Adafruit_NeoPixel(NEO_COUNT, NEO_PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(12345);
+
+Vcc vcc(VCCCORR);
 
 // Calibration offsets
 float magxOffset = 20;//2.55;
@@ -43,6 +53,8 @@ bool btn1rel = false; //Buttons released
 bool btn2rel = false;
 bool bothbtnrel = false; //Both buttons released at about the same time
 
+float batteryLevel = 1.0;
+
 //Counts how long you're holding config access
 int configHoldCounter = 0;
 
@@ -56,6 +68,8 @@ int compassReading;
 byte lastMin = 0;
 
 bool messageWaiting = false;
+bool batteryChecked = false;
+bool batteryWarning = false;
 
 struct timeEEVar{
   byte hours;
@@ -80,12 +94,12 @@ void setup() {
   
   fakeSerial.begin(9600);
   
-  Serial.begin(115200); // The Bluetooth Mate defaults to 115200bps
+  /*Serial.begin(115200); // The Bluetooth Mate defaults to 115200bps
   Serial.print("$");  // Print three times individually
   Serial.print("$");
   Serial.print("$");  // Enter command mode
   delay(1000);  // Short delay, wait for the Mate to send back CMD
-  Serial.println("U,9600,N");
+  Serial.println("U,9600,N");*/
   Serial.begin(9600);
   /*bluetooth.begin(115200);  // The Bluetooth Mate defaults to 115200bps
   bluetooth.print("$");  // Print three times individually
@@ -176,6 +190,7 @@ void setup() {
 
 void loop() {
   checkButtons();
+  checkBatteryLevel();
   
   if(btn1 && btn2){
     configHoldCounter += tickDelay;
@@ -215,7 +230,21 @@ void loop() {
   
   loopState();
   
-  if(messageWaiting && millis()%4000 < 1000){
+  if(batteryLevel < 0.2 && (configFlags & CONFIG_BATTWARN)==1 && millis()%4000 < 1000){
+    displayBatteryColors();
+    pushColors();
+    
+    analogWrite(MOTOR_PIN, 1023);
+    delay(200);
+    analogWrite(MOTOR_PIN, 0);
+    delay(50);
+    
+    analogWrite(MOTOR_PIN, 1023);
+    delay(700);
+    analogWrite(MOTOR_PIN, 0);
+    delay(300);
+    
+  }else if(messageWaiting && millis()%4000 < 1000){
     messageFlash();
   }
   
@@ -298,12 +327,14 @@ void loopState(){
     case CLOCK_STATE: clockState(); break;
     case 1: compassState(); break;
     case 2: flashlight(); break;
-    case 3: screensaver(); break;
+    case 3: showBatteryState(); break;
     case 4: configState(); break;
     case 5: setTimeState(); break;
     case 6: setBrightnessState(); break;
-    case 7: buttonPlay(); break;
-    case 8: alarmState(); break;
+    case 7: screensaver(); break;
+    case 8: buttonPlay(); break;
+    
+    case ALARM_STATE: alarmState(); break;//Over statecount, ignored by state chooser.
     default:
       state = CLOCK_STATE;
       break;
@@ -328,6 +359,11 @@ float checkLightLevel(){
   return light;
 }
 
+float checkBatteryLevel(){
+  batteryLevel = vcc.Read_Perc(VCCMIN,VCCMAX)/100.0;
+  return batteryLevel;
+}
+
 /************************************************************************************************ Rando Funcs *************************************************************************************************/
 void startupFlash(){
  for(byte i = 0; i < NEO_COUNT+3; i++){
@@ -348,6 +384,8 @@ void startupFlash(){
    pushColors();
    delay(100);
  }
+ displayBatteryColors();
+ pushColors();
  delay(80);
  setColor(NEO_COUNT-1, 0,0,0);
  pushColors();
@@ -409,6 +447,26 @@ void messageFlash(){
   analogWrite(MOTOR_PIN,0);
   delay(50);
     
+}
+
+void displayBatteryColors(){
+  float batt = checkBatteryLevel();
+  for(float i = 0; i < NEO_COUNT; i++){
+    float p = (i+1)/NEO_COUNT;
+    if(p <= batt){ //Light on!
+      if(p < 0.4){ //first 2 leds
+        setColor((byte)i, 255,0,0);
+      }else if(p > 0.8){//Last 2 leds
+        setColor((byte)i, 0,255,0);
+      }else{
+        setColor((byte)i, 255,255,0);
+      }
+    }else{
+      setColor((byte)i, 0,0,0);
+    }
+  }
+  //Serial.print("BATTERY ");
+  //Serial.println(batt);
 }
 
 // Input a value 0 to 255 to get a color value.
@@ -761,6 +819,10 @@ void alarmState(){
   }
 }
 
+void showBatteryState(){
+  displayBatteryColors();
+}
+
 /************************************************** DAEMONS **************************************************/
 
 float lastLightLevel[3];
@@ -795,7 +857,6 @@ void checkBluetooth(){
     fakeSerial.print(c);
     fakeSerial.print('#');
     Serial.print(c);
-    Serial.write('#');
     if(c == ';'){
       handleMessage(msgBuild);
       msgBuild = "";
@@ -807,27 +868,29 @@ void checkBluetooth(){
 }
 
 void handleMessage(String msg){
-  confirmFlash();
-  if(msg.startsWith("TIM=")){
-    //Serial.print("TIME");
-    int dot = msg.indexOf(".");
-    int h = msg.substring(4,dot).toInt();
-    int m = msg.substring(dot+1).toInt();
-    
-    setTime(h,m, 0,0,0,0);
-    //Serial.print("Time set to ");
-    //Serial.print(h);
-    //Serial.print(":");
-    //Serial.println(m);
-  }else if(msg.startsWith("ALR")){
-    //Serial.println("ALARM!!!!");
-    setState(8);
-  }else if(msg.startsWith("SMS")){
-    Serial.println("SMS!!!");
-    messageWaiting = true;
-    messageFlash();
-  }else if(msg.startsWith("AST")){
-    if(state == 8) setState(CLOCK_STATE);
+  if(configFlags & CONFIG_BLUETOOTH == 1){
+    confirmFlash();
+    if(msg.startsWith("TIM=")){
+      //Serial.print("TIME");
+      int dot = msg.indexOf(".");
+      int h = msg.substring(4,dot).toInt();
+      int m = msg.substring(dot+1).toInt();
+      
+      setTime(h,m, 0,0,0,0);
+      //Serial.print("Time set to ");
+      //Serial.print(h);
+      //Serial.print(":");
+      //Serial.println(m);
+    }else if(msg.startsWith("ALR")){
+      //Serial.println("ALARM!!!!");
+      setState(ALARM_STATE);
+    }else if(msg.startsWith("SMS")){
+      Serial.println("SMS!!!");
+      messageWaiting = true;
+      messageFlash();
+    }else if(msg.startsWith("AST")){
+      if(state == ALARM_STATE) setState(CLOCK_STATE);
+    }
   }
   Serial.print("Thanks! ");
   Serial.println(msg);

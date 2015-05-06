@@ -8,3 +8,4 @@ Required libraries:
  - [Adafruit LSM303DLHC Driver](https://github.com/adafruit/Adafruit_LSM303DLHC)
  - [Adafruit NeoPixel Library](https://github.com/adafruit/Adafruit_NeoPixel)
  - [Arduino wear leveling](https://github.com/drjoju/Arduino-wear-leveling)
+ - [VCC Supply level checking](https://github.com/Yveaux/arduino_vcc)
