@@ -886,9 +886,9 @@ void checkBluetooth(){
       msgBuild.concat(c);
 //      msgBuild += c;
     }
-    if(state == BTDIST_STATE && msgBuild.startsWith("RSSI: ") && c == '\n'){
-      String hStr = msgBuild.substring(6,8);
-      String lStr = msgBuild.substring(9,11);
+    if(state == BTDIST_STATE && msgBuild.startsWith("RSSI:") && c == '\n'){
+      String hStr = msgBuild.substring(5,7);
+      String lStr = msgBuild.substring(8,10);
       
       rangeHigh = (int)strtoul(&hStr[0], NULL, 16);
       rangeLow = (int)strtoul(&lStr[0], NULL, 16);
