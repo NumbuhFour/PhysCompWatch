@@ -16,10 +16,11 @@
 #define PHOTO_PIN   0
 #define PIEZO_PIN   6
 
-#define STATES      9
+#define STATES      10
 #define CLOCK_STATE 0
 #define ALARM_STATE 64
 #define ANDROID_STATE 63
+#define BTDIST_STATE 9
 
 #define DATA_START 32
 
@@ -55,6 +56,9 @@ bool btn2rel = false;
 bool bothbtnrel = false; //Both buttons released at about the same time
 
 float batteryLevel = 1.0;
+
+int rangeHigh = 0;//Bluetooth range
+int rangeLow = 0; 
 
 //Counts how long you're holding config access
 int configHoldCounter = 0;
@@ -317,6 +321,7 @@ void loopState(){
     case 6: setBrightnessState(); break;
     case 7: screensaver(); break;
     case 8: buttonPlay(); break;
+    case BTDIST_STATE: btDistState(); break;
     
     case ALARM_STATE: alarmState(); break;//Over statecount, ignored by state chooser.
     case ANDROID_STATE: androidState(); break;//Over statecount, ignored by state chooser.
@@ -559,8 +564,14 @@ int genNum = 0;
 
 //NOT A STATE. Defined here for access to state globals
 void setState(int s){
-  if(state == ANDROID_STATE && s != ANDROID_STATE){ //Leaving arduino state
+  if(s == state) return;
+  
+  if(state == ANDROID_STATE){ //Leaving arduino state
     Serial.println("LEAV");
+  }if(state == BTDIST_STATE){ //Leaving btDist state
+    Serial.println("L"); //Turn off RSSI
+    delay(100); //Wait for response
+    Serial.println("---"); //Leave CMD mode
   }
   
   genNum = 0;
@@ -812,6 +823,28 @@ void androidState(){
   if(btn2rel) Serial.println("btn2");
 }
 
+void btDistState(){
+  if(genNum == 0){
+    genNum = 1; //Ensure it happens only once
+    Serial.print('$');
+    Serial.print('$');
+    Serial.print('$');
+    delay(100); //Wait for "CMD"
+    Serial.println("L"); //Turn on RSSI
+  }
+  clearColors();
+  fakeSerial.print("High: ");
+  fakeSerial.print(rangeHigh);
+  fakeSerial.print(" Low: ");
+  fakeSerial.println(rangeLow);
+  float avg = ((float)rangeHigh + (float)rangeLow)/2.0f;
+  float perc = avg / 255;
+  for(byte i = 0; i < NEO_COUNT; i++){
+    if(perc >= ((float)i/NEO_COUNT)){
+      setColor(i, 0,255,0);
+    }
+  }
+}
 /************************************************** DAEMONS **************************************************/
 
 float lastLightLevel[3];
@@ -852,6 +885,14 @@ void checkBluetooth(){
     }else{
       msgBuild.concat(c);
 //      msgBuild += c;
+    }
+    if(state == BTDIST_STATE && msgBuild.startsWith("RSSI: ") && c == '\n'){
+      String hStr = msgBuild.substring(6,8);
+      String lStr = msgBuild.substring(9,11);
+      
+      rangeHigh = (int)strtoul(&hStr[0], NULL, 16);
+      rangeLow = (int)strtoul(&lStr[0], NULL, 16);
+      msgBuild = "";
     }
   }
 }
