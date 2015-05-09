@@ -6,6 +6,7 @@
 #include <EEPROM.h>
 #include <wl.h>
 #include <Vcc.h>
+#include <SoftwareSerial.h>  
 
 #define NEO_COUNT   7
 
@@ -16,10 +17,11 @@
 #define PHOTO_PIN   0
 #define PIEZO_PIN   6
 
-#define STATES      9
+#define STATES      10
 #define CLOCK_STATE 0
 #define ALARM_STATE 64
 #define ANDROID_STATE 63
+#define UNITY_STATE 7
 
 #define DATA_START 32
 
@@ -27,19 +29,21 @@
 #define CONFIG_BLUETOOTH  2 //Pay attention to bluetooth messages
 #define CONFIG_BATTWARN   4 //Warn when battery low
 
-#define VCCMIN   0.0           // Minimum expected Vcc level, in Volts.
-#define VCCMAX   5.0           // Maximum expected Vcc level, in Volts.
+#define VCCMIN   3.4           // Minimum expected Vcc level, in Volts.
+#define VCCMAX   4.19           // Maximum expected Vcc level, in Volts.
 #define VCCCORR  1.0           // Measured Vcc by multimeter divided by reported Vcc
 
 
 Adafruit_NeoPixel pix = Adafruit_NeoPixel(NEO_COUNT, NEO_PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(12345);
+Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(54321);
 
 Vcc vcc(VCCCORR);
 
 // Calibration offsets
 float magxOffset = 20;//2.55;
 float magyOffset = 0;//27.95;
+float magzOffset = 20;//27.95;
 
 uint32_t colors[NEO_COUNT];
 float ledStrength = 0.05;
@@ -66,6 +70,9 @@ bool buttonsReleased = false;
 
 int compassReading;
 
+float ax,ay,az;
+float mx,my,mz;
+
 byte lastMin = 0;
 
 bool messageWaiting = false;
@@ -82,8 +89,9 @@ byte configFlags = 1;
 long CONFIGVAR_START;
 
 wl wearLeveling(&writer, &reader);
+//Generic global number, reset each state switch
+int genNum = 0;
 
-#include <SoftwareSerial.h>  
 SoftwareSerial fakeSerial(7,8); //tx.rx
 //SoftwareSerial bluetooth(0, 1);
 void setup() {
@@ -127,7 +135,7 @@ void setup() {
   
   
   /* Initialise the sensor */
-  if(!mag.begin())
+  if(!mag.begin() || !accel.begin())
   {
     // There was a problem detecting the LSM303 ... check your connections 
     Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
@@ -315,13 +323,17 @@ void loopState(){
     case 4: configState(); break;
     case 5: setTimeState(); break;
     case 6: setBrightnessState(); break;
-    case 7: screensaver(); break;
-    case 8: buttonPlay(); break;
+    case 7: unityState(); break;
+    case 8: screensaver(); break;
+    case 9: buttonPlay(); break;
     
     case ALARM_STATE: alarmState(); break;//Over statecount, ignored by state chooser.
     case ANDROID_STATE: androidState(); break;//Over statecount, ignored by state chooser.
     default:
-      state = CLOCK_STATE;
+      errorFlash();
+      int s = state;
+      setState(-1);
+      genNum = s;
       break;
   }
 }
@@ -348,6 +360,7 @@ float checkBatteryLevel(){
   batteryLevel = vcc.Read_Perc(VCCMIN,VCCMAX)/100.0;
   return batteryLevel;
 }
+
 
 /************************************************************************************************ Rando Funcs *************************************************************************************************/
 void startupFlash(){
@@ -491,7 +504,10 @@ void compassCheck() {
     //compassTimer = millis(); // reset the timer
 
     // Calculate the angle of the vector y,x
-    float heading = (atan2(event.magnetic.y + magyOffset,event.magnetic.x + magxOffset) * 180) / Pi;
+    mx = event.magnetic.x+magxOffset;
+    my = event.magnetic.y+magyOffset;
+    mz = event.magnetic.z+magzOffset;
+    float heading = (atan2(my + magyOffset,mx + magxOffset) * 180) / Pi;
 
   //Serial.print("Compass: x");
   //Serial.print(event.magnetic.x+magxOffset);
@@ -506,6 +522,14 @@ void compassCheck() {
   //}  
 }  
 
+void accelCheck(){
+  sensors_event_t event;
+  accel.getEvent(&event);
+  
+  ax = event.acceleration.x;
+  ay = event.acceleration.y;
+  az = event.acceleration.z;
+}
 
 int cali = 200;
 void compassDirection(int compassHeading) 
@@ -553,9 +577,8 @@ void compassDirection(int compassHeading)
 }
 
 
-/************************************************** STATES **************************************************/
-//Generic global number, reset each state switch
-int genNum = 0;
+/************************************************** STATES ************************************************************************************************************************/
+
 
 //NOT A STATE. Defined here for access to state globals
 void setState(int s){
@@ -812,6 +835,22 @@ void androidState(){
   if(btn2rel) Serial.println("btn2");
 }
 
+void unityState(){
+  accelCheck();
+  compassCheck();
+  String axs = String(ax);
+  String ays = String(ay);
+  String azs = String(az);
+  String output = "ACL:" + axs + "," + ays + "," + azs;
+  Serial.println(output);
+  
+  String mxs = String(mx);
+  String mys = String(my);
+  String mzs = String(mz);
+  output = "MAG:" + mxs + "," + mys + "," + mzs;
+  Serial.println(output);
+}
+
 /************************************************** DAEMONS **************************************************/
 
 float lastLightLevel[3];
@@ -845,7 +884,6 @@ void checkBluetooth(){
     char c = (char)Serial.read();
     fakeSerial.print(c);
     fakeSerial.print('#');
-    Serial.print(c);
     if(c == ';'){
       handleMessage(msgBuild);
       msgBuild = "";
@@ -857,9 +895,6 @@ void checkBluetooth(){
 }
 
 void handleMessage(String msg){
-  Serial.print("CONFIG ");
-  Serial.print(configFlags);
-  Serial.print(" ");
   Serial.println(configFlags&CONFIG_BLUETOOTH);
   if(configFlags & CONFIG_BLUETOOTH == CONFIG_BLUETOOTH){
     //confirmFlash();
@@ -888,8 +923,8 @@ void handleMessage(String msg){
     }else if(state == ANDROID_STATE){
       
     }
+    Serial.print("Thanks! ");
+    Serial.println(msg);
   }
-  Serial.print("Thanks! ");
-  Serial.println(msg);
 }
 
