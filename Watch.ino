@@ -7,6 +7,7 @@
 #include <wl.h>
 #include <Vcc.h>
 #include <SoftwareSerial.h>  
+#include <IRremote.h>
 
 #define NEO_COUNT   7
 
@@ -16,6 +17,7 @@
 #define MOTOR_PIN  10 //Vibration motor
 #define PHOTO_PIN   0
 #define PIEZO_PIN   6
+#define IRSEN_PIN   9
 
 #define STATES      10
 #define CLOCK_STATE 0
@@ -30,6 +32,7 @@
 #define CONFIG_BLUETOOTH  2 //Pay attention to bluetooth messages
 #define CONFIG_BATTWARN   4 //Warn when battery low
 #define CONFIG_ACCELRTN   8    //Go to clock by shake
+#define CONFIG_ACCELRTN   16    //Contextual shakes
 
 #define VCCMIN   3.8           // Minimum expected Vcc level, in Volts.
 #define VCCMAX   4.19           // Maximum expected Vcc level, in Volts.
@@ -39,6 +42,8 @@
 Adafruit_NeoPixel pix = Adafruit_NeoPixel(NEO_COUNT, NEO_PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(12345);
 Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(54321);
+
+IRrecv irrecv(IRSEN_PIN);
 
 Vcc vcc(VCCCORR);
 
@@ -73,6 +78,9 @@ bool buttonsReleased = false;
 int compassReading;
 
 int accelReturnDelay = 0;
+
+decode_results ir_results;
+bool haveIRResults = false;
 
 float ax,ay,az;
 float mx,my,mz;
@@ -137,6 +145,7 @@ void setup() {
   pix.begin();
   pix.show(); // Initialize all pixels to 'off'
   
+  irrecv.enableIRIn(); // Start the receiver
   
   /* Initialise the sensor */
   if(!mag.begin() || !accel.begin())
@@ -204,6 +213,12 @@ void setup() {
 void loop() {
   checkButtons();
   checkBatteryLevel();
+  IRCheck();
+  
+  if(haveIRResults){
+    Serial.println(ir_results.value, HEX);
+    confirmFlash();
+  }
   
   if(btn1 && btn2){
     configHoldCounter += tickDelay;
@@ -269,6 +284,8 @@ void loop() {
   delay(tickDelay);
   lbtn1 = btn1;
   lbtn2 = btn2;
+  
+  haveIRResults = false;
   
    //Power light. If things are frozen, light should remain on.
    digitalWrite(13,HIGH);
@@ -547,6 +564,14 @@ void accelCheck(){
   az = event.acceleration.z;
 }
 
+void IRCheck(){
+  if (irrecv.decode(&ir_results)) {
+    //Serial.println(results.value, HEX);
+    haveIRResults = true;
+    irrecv.resume(); // Receive the next value
+  }
+}
+
 int cali = 200;
 void compassDirection(int compassHeading) 
 {
@@ -803,6 +828,7 @@ void setBrightnessState(){
   }
 }
 
+bool configPressed = false;
 void configState(){
   setColors(127, 100,170,170);
   setColors(configFlags,  255,60,0);
@@ -815,12 +841,15 @@ void configState(){
     
     wearLeveling.open(CONFIGVAR_START); //Save to eeprom
     wearLeveling.writeRec(WL_REC configFlags);
-  }else if(btn1rel){
+    configPressed = true;
+  }else if(btn1rel && !configPressed){
     genNum = (genNum+1)%7;
-  }else if(btn2rel){
+  }else if(btn2rel && !configPressed){
     genNum --;
     if(genNum < 0) genNum = 6;
   }
+  
+  if(!btn1 && !btn2) configPressed = false;
 }
 
 void alarmState(){
