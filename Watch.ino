@@ -22,14 +22,16 @@
 #define ALARM_STATE 64
 #define ANDROID_STATE 63
 #define UNITY_STATE 7
+#define BATTERY_STATE 3
 
 #define DATA_START 32
 
 #define CONFIG_LIGHTLEVEL 1 //Light level auto-changes
 #define CONFIG_BLUETOOTH  2 //Pay attention to bluetooth messages
 #define CONFIG_BATTWARN   4 //Warn when battery low
+#define CONFIG_ACCELRTN   8    //Go to clock by shake
 
-#define VCCMIN   3.4           // Minimum expected Vcc level, in Volts.
+#define VCCMIN   3.8           // Minimum expected Vcc level, in Volts.
 #define VCCMAX   4.19           // Maximum expected Vcc level, in Volts.
 #define VCCCORR  1.0           // Measured Vcc by multimeter divided by reported Vcc
 
@@ -48,7 +50,7 @@ float magzOffset = 20;//27.95;
 uint32_t colors[NEO_COUNT];
 float ledStrength = 0.05;
 
-byte tickDelay = 50;
+byte tickDelay = 15;
 
 bool btn1 = false;
 bool lbtn1 = false; //Last value of btn1
@@ -63,12 +65,14 @@ float batteryLevel = 1.0;
 //Counts how long you're holding config access
 int configHoldCounter = 0;
 
-int state = 0;//What function state we are currently in
+int state = CLOCK_STATE;//What function state we are currently in
 
 //Config waits for buttons to be released first
 bool buttonsReleased = false;
 
 int compassReading;
+
+int accelReturnDelay = 0;
 
 float ax,ay,az;
 float mx,my,mz;
@@ -222,6 +226,18 @@ void loop() {
     
   }
   
+  if((configFlags & CONFIG_ACCELRTN) == CONFIG_ACCELRTN && accelReturnDelay == 0){
+    accelCheck();
+    if(az > 19.5){
+      confirmFlash();
+      if(state == CLOCK_STATE)
+        setState(BATTERY_STATE);
+      else
+        setState(CLOCK_STATE);
+    }
+  }
+  accelReturnDelay = max(accelReturnDelay-1,0);
+  
   if(btn1 || btn2) messageWaiting = false;
   
   loopState();
@@ -319,7 +335,7 @@ void loopState(){
     case CLOCK_STATE: clockState(); break;
     case 1: compassState(); break;
     case 2: flashlight(); break;
-    case 3: showBatteryState(); break;
+    case BATTERY_STATE: showBatteryState(); break;
     case 4: configState(); break;
     case 5: setTimeState(); break;
     case 6: setBrightnessState(); break;
@@ -728,8 +744,10 @@ void clockState(){
   //  light 11 = min<60
   
   if(btn1rel) {
-    showClock = !showClock;
+    genNum ++;
+    //showClock = !showClock;
   }
+  showClock = genNum%2==0;
   if(!showClock){
     clearColors();
     return;
@@ -828,6 +846,8 @@ void alarmState(){
 
 void showBatteryState(){
   displayBatteryColors();
+  Serial.print("Battery ");
+  Serial.println(batteryLevel);
 }
 
 void androidState(){
@@ -848,7 +868,7 @@ void unityState(){
   String mys = String(my);
   String mzs = String(mz);
   output = "MAG:" + mxs + "," + mys + "," + mzs;
-  Serial.println(output);
+  //Serial.println(output);
 }
 
 /************************************************** DAEMONS **************************************************/
@@ -896,7 +916,7 @@ void checkBluetooth(){
 
 void handleMessage(String msg){
   Serial.println(configFlags&CONFIG_BLUETOOTH);
-  if(configFlags & CONFIG_BLUETOOTH == CONFIG_BLUETOOTH){
+  if((configFlags & CONFIG_BLUETOOTH) == CONFIG_BLUETOOTH){
     //confirmFlash();
     if(msg.startsWith("TIM=")){
       //Serial.print("TIME");
@@ -905,12 +925,12 @@ void handleMessage(String msg){
       int m = msg.substring(dot+1).toInt();
       
       setTime(h,m, 0,0,0,0);
-      //Serial.print("Time set to ");
-      //Serial.print(h);
-      //Serial.print(":");
-      //Serial.println(m);
+      Serial.print("Time set to ");
+      Serial.print(h);
+      Serial.print(":");
+      Serial.println(m);
     }else if(msg.startsWith("ALR")){
-      //Serial.println("ALARM!!!!");
+      Serial.println("ALARM!!!!");
       setState(ALARM_STATE);
     }else if(msg.startsWith("SMS")){
       Serial.println("SMS!!!");
@@ -923,8 +943,9 @@ void handleMessage(String msg){
     }else if(state == ANDROID_STATE){
       
     }
-    Serial.print("Thanks! ");
-    Serial.println(msg);
+    Serial.println("Thanks! [" + msg + "]");
+  }else{
+    Serial.println("Bluetooth signal ignored.");
   }
 }
 
