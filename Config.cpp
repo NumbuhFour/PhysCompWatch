@@ -79,6 +79,6 @@ bool Config::checkFlag(int flag){
   return ( (configFlags & flag) == flag );
 }
 void Config::setFlags(byte flags){
-  configFlags = flags
+  configFlags = flags;
   writeConfigToEEPROM();
 }
