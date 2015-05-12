@@ -10,6 +10,7 @@
 #include "Accel.h"
 #include "Mag.h"
 #include "Buttons.h"
+#include "Light.h"
 
 class Lilywatch
 {
@@ -26,9 +27,11 @@ class Lilywatch
     Config * cfg;
     Colors * colors;
     
+    //Sensors
     Accel * accel;
     Mag * mag;
     Buttons * btn;
+    Light * light;
     
     byte tickDelay = 15;
 };

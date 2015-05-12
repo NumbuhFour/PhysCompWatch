@@ -59,27 +59,6 @@ void setup() {
   
   
   
-  pix.begin();
-  pix.show(); // Initialize all pixels to 'off'
-  
-  
-  if(!mag.begin() || !accel.begin())
-  {
-    // There was a problem detecting the LSM303 ... check your connections 
-    Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
-    
-    while(1){
-      setColors(127, 255,0,0);
-      pushColors();
-      delay(500);
-      clearColors();
-      pushColors();
-      delay(500);
-    }
-  }
-  
-
-  
   lastMin = minute();
   
   startupFlash();
@@ -191,23 +170,6 @@ void loopState(){
   }
 }
 
-void checkButtons(){
-  btn1 = digitalRead(BTN1_PIN)==HIGH;
-  btn2 = digitalRead(BTN2_PIN)==HIGH;
-  btn1rel = lbtn1 && !btn1;
-  btn2rel = lbtn2 && !btn2;
-  bothbtnrel = ((btn1rel && btn2) || (btn2rel && btn1));
-}
-
-float checkLightLevel(){
-  float light = analogRead(PHOTO_PIN);
-  
-  light = (light/1024)*2;
-  if(light > 1) light = 1;
-  if(light <= 0.05) light = 0.05;
-  
-  return light;
-}
 
 float checkBatteryLevel(){
   batteryLevel = vcc.Read_Perc(VCCMIN,VCCMAX)/100.0;
@@ -341,47 +303,6 @@ uint32_t Wheel(byte WheelPos) {
                    (byte)((float)b * ledStrength));
 }
 
-
-void compassCheck() {
-  // if millis() or timer wraps around, we'll just reset it
-  //if (compassTimer > millis()) compassTimer = millis();
-
-  // approximately every 10 seconds or so, update time
-  //if (millis() - compassTimer > 50) {
-    sensors_event_t event; 
-    mag.getEvent(&event);
-
-    float Pi = 3.14159;
-
-    //compassTimer = millis(); // reset the timer
-
-    // Calculate the angle of the vector y,x
-    mx = event.magnetic.x+magxOffset;
-    my = event.magnetic.y+magyOffset;
-    mz = event.magnetic.z+magzOffset;
-    float heading = (atan2(my + magyOffset,mx + magxOffset) * 180) / Pi;
-
-  //Serial.print("Compass: x");
-  //Serial.print(event.magnetic.x+magxOffset);
-  //Serial.print(" y");
-  //Serial.print(event.magnetic.y+magyOffset);
-    // Normalize to 0-360
-    if (heading < 0)
-    {
-      heading = 360 + heading;
-    }
-    compassReading = heading; 
-  //}  
-}  
-
-void accelCheck(){
-  sensors_event_t event;
-  accel.getEvent(&event);
-  
-  ax = event.acceleration.x;
-  ay = event.acceleration.y;
-  az = event.acceleration.z;
-}
 
 int cali = 200;
 void compassDirection(int compassHeading) 
