@@ -6,7 +6,7 @@ Colors::Colors(Lilywatch* lw): watch(lw), pix(NEO_COUNT, NEO_PIN, NEO_GRB + NEO_
   this->pix.begin();
   this->pix.show(); // Initialize all pixels to 'off'
 }
-/*
+
 float Colors::getStrength(){
   return this->ledStrength;
 }
@@ -43,4 +43,4 @@ void Colors::pushColors(){
     this->pix.setPixelColor(i, this->colors[i]);
   }
   pix.show();
-}*/
+}
