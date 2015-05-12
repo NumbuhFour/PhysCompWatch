@@ -191,51 +191,7 @@ void setTimeState(){
 
 bool showClock = true;
 void clockState(){
-  //light 2 will be yellow if am, orange if pm
-  //lights 3-6 will be binary for hour in 12-hour format (green)
-  //lights 0&1 will represent part of hour: (blue)
-  //  light 00 = min<15
-  //  light 01 = min<30
-  //  light 10 = min<45
-  //  light 11 = min<60
   
-  if(btn1rel) {
-    genNum ++;
-    //showClock = !showClock;
-  }
-  showClock = genNum%2==0;
-  if(!showClock){
-    clearColors();
-    return;
-  }
-  
-  byte hours = hourFormat12();
-  bool isam = isAM();
-  byte mins = minute();
-  
-  if(btn2){ //Show minutes detail if b2 is pressed
-    clearColors();
-    setColors(63, 0,45,30); //minute background
-    setColors(mins, 0,0,255);
-    
-    if(second()%2 == 0) setColor(6, 0,0,0); //AMPM because a light is not used
-    else if(isam) setColor(6, 200,255,0);
-    else setColor(6, 255,50,0);
-    
-  }else{ //Otherwise show full time
-    if(second()%2 == 0) setColor(2, 0,0,0);
-    else if(isam) setColor(2, 200,255,0);
-    else setColor(2, 255,50,0);
-    
-    setColors(120, 0,0,0); //hour background
-    setColors(3, 0,0,0); //minute background
-    
-    hours = hours << 3;
-    setColors(hours, 0,255,0);
-    
-    mins = mins/15;
-    setColors(mins, 0,0,255);
-  }
 }
 
 void setBrightnessState(){

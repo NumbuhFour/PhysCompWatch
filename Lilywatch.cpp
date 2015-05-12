@@ -2,6 +2,7 @@
 #include <Time.h>
 
 #include "ButtonPlayState.h"
+#include "ClockState.h"
 
 Lilywatch::Lilywatch(): fakeSerial(7,8){
   cfg = new Config(this);
@@ -19,7 +20,8 @@ Lilywatch::Lilywatch(): fakeSerial(7,8){
   
   //Making states
   selState = new SelectorState(this);
-  states[0] = new ButtonPlayState(this);
+  states[0] = new ClockState(this);
+  states[1] = new ButtonPlayState(this);
 }
 
 void Lilywatch::setup(){
@@ -150,7 +152,7 @@ void Lilywatch::setState(int s){
   }
   btn->check(); //To make sure none are set as just released
   
-  if(s != -1){
+  if(s == -1){
     selState->start();
   } else if(states[s] != 0){
     states[s]->start();
