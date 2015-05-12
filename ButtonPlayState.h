@@ -1,6 +1,6 @@
 /*
   ButtonPlayState.h - ButtonPlay app for the Lilywatch
-  Shows a white LED in the direction of north
+  A test app that has the LEDs react to the buttons
 */
 
 #ifndef ButtonPlayState_h

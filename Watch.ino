@@ -34,70 +34,6 @@ void setup() {
 }
 
 void loop() {
-  checkButtons();
-  checkBatteryLevel();
-    
-  if(configHoldCounter >= 600 && state != -1){// Config accessed!
-    setColors(85,255,0,0);
-    setColors(42,240,255,0);
-    pushColors();
-    
-    pulseMotorRepeat(1023, 100,50,3);
-    
-    configHoldCounter = 0;
-    buttonsReleased = false;
-    
-    //Serial.println("State picker accessed.");
-    setState(-1);
-    
-  }
-  
-  if((configFlags & CONFIG_ACCELRTN) == CONFIG_ACCELRTN && accelReturnDelay == 0){
-    accelCheck();
-    if(az > 19.5){
-      confirmFlash();
-      if(state == CLOCK_STATE)
-        setState(BATTERY_STATE);
-      else
-        setState(CLOCK_STATE);
-    }
-  }
-  accelReturnDelay = max(accelReturnDelay-1,0);
-  
-  if(btn1 || btn2) messageWaiting = false;
-  
-  loopState();
-  
-  if(batteryLevel < 0.2 && (configFlags & CONFIG_BATTWARN)==CONFIG_BATTWARN && millis()%4000 < 1000){
-    displayBatteryColors();
-    pushColors();
-    
-    pulseMotor(1023, 200);
-    delay(50);
-    
-    pulseMotor(1023, 700);
-    delay(300);
-    
-  }else if(messageWaiting && millis()%4000 < 1000){
-    messageFlash();
-  }
-  
-  loopDaemons();
-    
-  byte mins = minute();
-  if(lastMin != mins){
-    lastMin = mins;
-    writeClockToEEPROM();
-  }
-  
-  pushColors();
-  digitalWrite(13,LOW);
-  delay(tickDelay);
-  lbtn1 = btn1;
-  lbtn2 = btn2;
-  
-   //Power light. If things are frozen, light should remain on.
-   digitalWrite(13,HIGH);
 }
 
 
@@ -232,24 +168,6 @@ void statePicker(){
   } 
   setColors(127, 100,100,100);
   setColors(genNum, 255,0,255);
-}
-
-//Test state. LEDs react to buttons
-void buttonPlay(){
-  if(btn1) {
-    setColor(0, 255,0,255);
-    setColor(1, 255,0,255);
-  }else{
-    setColor(0, 0,0,0);
-    setColor(1, 0,0,0);
-  }
-  if(btn2){
-    setColor(5, 255,0,255);
-    setColor(6, 255,0,255);
-  }else{
-    setColor(5, 0,0,0);
-    setColor(6, 0,0,0);
-  }
 }
 
 //Sets pretty colors. Taken from neopixel example
