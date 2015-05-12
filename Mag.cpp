@@ -48,3 +48,7 @@ float* Mag::getData(){
   float rtn[] = {mx,my,mz};
   return rtn;
 }
+
+float Mag::getCompassReading(){
+  return compassReading;
+}

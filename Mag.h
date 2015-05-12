@@ -23,12 +23,14 @@ private:
   float magyOffset = 0;//27.95;
   float magzOffset = 20;//27.95;
   float mx,my,mz;
+  float compassReading;
 public:
   Mag(Lilywatch * lw);
   void init();
   void check();
   
   float* getData();
+  float getCompassReading();
 };
 
 #endif
