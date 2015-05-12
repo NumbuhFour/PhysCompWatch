@@ -70,3 +70,15 @@ void Config::writeConfigToEEPROM(){
     wearLeveling.open(CONFIGVAR_START); //Save to eeprom
     wearLeveling.writeRec(WL_REC configFlags);
 }
+
+
+byte Config::getFlags(){
+  return configFlags;
+}
+bool Config::checkFlag(int flag){
+  return ( (configFlags & flag) == flag );
+}
+void Config::setFlags(byte flags){
+  configFlags = flags
+  writeConfigToEEPROM();
+}

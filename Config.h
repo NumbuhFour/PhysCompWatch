@@ -33,6 +33,10 @@ public:
 	
 	void writeConfigToEEPROM();
 	void writeClockToEEPROM();
+  
+  byte getFlags();
+  bool checkFlag(int);
+  void setFlags(byte);
 };
 
 #endif
