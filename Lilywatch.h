@@ -4,6 +4,7 @@
 #include <SoftwareSerial.h>  
 #include "Arduino.h"
 #include "Defines.h"
+#include "WatchState.h"
 #include "Config.h"
 #include "Colors.h"
 #include "Motor.h"
@@ -35,6 +36,7 @@ class Lilywatch
     void loopState(); // Let's the current app run
     void loopDaemons(); // Daemons always run
   
+    WatchState * states[STATES];
     SoftwareSerial fakeSerial;
     Config * cfg;
     Colors * colors;

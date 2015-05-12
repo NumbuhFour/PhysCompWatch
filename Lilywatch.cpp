@@ -1,6 +1,8 @@
 #include "Lilywatch.h"
 #include <Time.h>
 
+#include "ButtonPlayState.h"
+
 Lilywatch::Lilywatch(): fakeSerial(7,8){
   cfg = new Config(this);
   colors = new Colors(this);
@@ -14,6 +16,9 @@ Lilywatch::Lilywatch(): fakeSerial(7,8){
   battery = new Battery();
   
   this->state = 1;
+  
+  //Making states
+  states[0] = new ButtonPlayState(this);
 }
 
 void Lilywatch::setup(){
@@ -46,8 +51,6 @@ void Lilywatch::run(){
   }else{
     selectorHoldCounter = 0;
   }
-  
-  
     
   if(selectorHoldCounter >= 600 && state != -1){// Config accessed!
     colors->setColors(85,255,0,0);
@@ -114,7 +117,7 @@ void Lilywatch::run(){
 }
 
 void Lilywatch::loopState(){
-  
+  states[0]->run();
 }
 
 void Lilywatch::loopDaemons(){
