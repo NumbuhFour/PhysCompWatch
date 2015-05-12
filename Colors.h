@@ -30,6 +30,8 @@ public:
   float getStrength();
   void setStrength(float);
   
+  uint32_t Wheel(byte WheelPos);
+  
   //Premade Animations
   void startupFlash();
   void errorFlash();

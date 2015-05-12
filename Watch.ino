@@ -178,92 +178,6 @@ float checkBatteryLevel(){
 
 
 // ************************************************************************************************ Rando Funcs ************************************************************************************************* /
-void startupFlash(){
- for(byte i = 0; i < NEO_COUNT+3; i++){
-   if(i > 2) setColor(i-3, 0,0,0);
-   if(i > 1 && i-2 < NEO_COUNT) setColor(i-2, 0,0,255);
-   if(i > 0 && i-1 < NEO_COUNT) setColor(i-1, 0,255,0);
-   if(i < NEO_COUNT) setColor(i, 255,0,0);
-   
-   pushColors();
-   delay(100);
- }
- for(int i = NEO_COUNT+2; i >= 0; i--){
-   if(i > 2) setColor(i-3, 255,0,0);
-   if(i > 1 && i-2 < NEO_COUNT) setColor(i-2, 0,255,0);
-   if(i > 0 && i-1 < NEO_COUNT) setColor(i-1, 0,0,255);
-   if(i < NEO_COUNT) setColor(i, 0,0,0);
-   
-   pushColors();
-   delay(100);
- }
- displayBatteryColors();
- pushColors();
- delay(80);
- setColor(NEO_COUNT-1, 0,0,0);
- pushColors();
- pulseMotorRepeat(1023,150,100,2);
-}
-
-void errorFlash(){
-    
-    for(byte i = 1; i <= 16; i++){
-      analogWrite(MOTOR_PIN,1023/ i);
-      
-      byte mod = i%8;
-      if(mod == 0){
-        clearColors();
-        setColors(85,255,128,0);
-        pushColors();
-      }else if(mod == 4){
-        clearColors();
-        setColors(42,255,128,0);
-        pushColors();
-      }
-      
-      delay(50);
-    }
-    analogWrite(MOTOR_PIN,0);
-}
-
-void confirmFlash(){
-    
-    clearColors();
-    setColors(42,0,255,0);
-    pushColors();
-    pulseMotor(1023, 150);
-    delay(50);
-}
-
-void messageFlash(){
-  for(byte i = 0; i < NEO_COUNT; i++)
-    setColor(i, Wheel(((i * 256 / NEO_COUNT) + 5) & 255));
-  pushColors();
-  pulseMotorRepeat(1023,150,50,2);
-  pulseMotor(1023, 250);
-  delay(50);
-    
-}
-
-void displayBatteryColors(){
-  float batt = checkBatteryLevel();
-  for(float i = 0; i < NEO_COUNT; i++){
-    float p = (i+1)/NEO_COUNT;
-    if(p <= batt){ //Light on!
-      if(p < 0.4){ //first 2 leds
-        setColor((byte)i, 255,0,0);
-      }else if(p > 0.8){//Last 2 leds
-        setColor((byte)i, 0,255,0);
-      }else{
-        setColor((byte)i, 255,255,0);
-      }
-    }else{
-      setColor((byte)i, 0,0,0);
-    }
-  }
-  //Serial.print("BATTERY ");
-  //Serial.println(batt);
-}
 
 void pulseMotor(int strength, int length){
   analogWrite(MOTOR_PIN, strength);
@@ -276,33 +190,6 @@ void pulseMotorRepeat(int strength, int length, int del, int count){
     delay(del);
   }
 }
-
-// Input a value 0 to 255 to get a color value.
-// The colours are a transition r - g - b - back to r.
-uint32_t Wheel(byte WheelPos) {
-  WheelPos = 255 - WheelPos;
-  byte r,g,b;
-  if(WheelPos < 85) {
-   r = 255 - WheelPos * 3;
-   g = 0;
-   b = WheelPos * 3;
-  } else if(WheelPos < 170) {
-    WheelPos -= 85;
-    r = 0;
-    g = WheelPos * 3;
-    b = 255 - WheelPos * 3;
-  } else {
-   WheelPos -= 170;
-   r = WheelPos * 3;
-   g = 255 - WheelPos * 3;
-   b = 0;
-  }
-  
-  return pix.Color((byte)((float)r * ledStrength),
-                   (byte)((float)g * ledStrength),
-                   (byte)((float)b * ledStrength));
-}
-
 
 int cali = 200;
 void compassDirection(int compassHeading) 
