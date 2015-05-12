@@ -14,46 +14,21 @@
 Lilywatch watch;
 
 void setup(){
-	
+	watch.setup();
 }
 
 void loop(){
-	
+	watch.run();
 }
 /*
 
 
 byte tickDelay = 15;
 
-//Counts how long you're holding config access
-int configHoldCounter = 0;
-
-int state = CLOCK_STATE;//What function state we are currently in
-
-//Config waits for buttons to be released first
-bool buttonsReleased = false;
-
-int compassReading;
-
-int accelReturnDelay = 0;
-
-float ax,ay,az;
-float mx,my,mz;
-
-byte lastMin = 0;
-
-bool messageWaiting = false;
-bool batteryChecked = false;
-bool batteryWarning = false;
-
 //Generic global number, reset each state switch
 int genNum = 0;
 
 void setup() {
-  
-  
-  
-  lastMin = minute();
   
   startupFlash();
   //Serial.println("Startup complete.");
@@ -62,13 +37,7 @@ void setup() {
 void loop() {
   checkButtons();
   checkBatteryLevel();
-  
-  if(btn1 && btn2){
-    configHoldCounter += tickDelay;
-  }else{
-    configHoldCounter = 0;
-  }
-  
+    
   if(configHoldCounter >= 600 && state != -1){// Config accessed!
     setColors(85,255,0,0);
     setColors(42,240,255,0);

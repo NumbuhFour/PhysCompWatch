@@ -1,4 +1,5 @@
 #include "Lilywatch.h"
+#include <Time.h>
 
 Lilywatch::Lilywatch(): fakeSerial(7,8){
   cfg = new Config(this);
@@ -29,10 +30,20 @@ void Lilywatch::setup(){
   btn->init();
   light->init();
   battery->init();
+  
+  lastMin = minute();
 }
 
 void Lilywatch::run(){
+  btn->check();
+  battery->check();
   
+  //Hold both buttons to access app selector
+  if(btn->btnDown(0) && btn->btnDown(1)){
+    selectorHoldCounter += tickDelay;
+  }else{
+    selectorHoldCounter = 0;
+  }
 }
 
 void Lilywatch::setState(byte s){

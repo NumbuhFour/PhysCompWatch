@@ -32,7 +32,6 @@ class Lilywatch
     Light* getLight();
     Battery* getBattery();
   private:
-    byte state;
     SoftwareSerial fakeSerial;
     Config * cfg;
     Colors * colors;
@@ -44,8 +43,25 @@ class Lilywatch
     Buttons * btn;
     Light * light;
     Battery * battery;
+
+    //
+    byte lastMin = 0;
+
+    bool messageWaiting = false;
+    bool batteryChecked = false;
+    bool batteryWarning = false;
     
     byte tickDelay = 15;
+
+    //Counts how long you're holding selector access
+    int selectorHoldCounter = 0;
+
+    int state = CLOCK_STATE;//What function state we are currently in
+
+    //Config waits for buttons to be released first
+    bool buttonsReleased = false;
+
+    int accelReturnDelay = 0;
 };
 
 #endif
