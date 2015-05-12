@@ -16,7 +16,7 @@ class Colors
 {
 private:
   Adafruit_NeoPixel pix;
-  uint32_t colors[NEO_COUNT];
+  uint32_t colors[NEO_COUNT] = {0};
   float ledStrength = 0.05;
   Lilywatch * watch;
 public:
