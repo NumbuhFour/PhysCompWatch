@@ -3,22 +3,30 @@
 
 #include <SoftwareSerial.h>  
 #include "Arduino.h"
+#include "Defines.h"
 #include "Config.h"
 #include "Colors.h"
-#include "Defines.h"
+
+#include "Accel.h"
+#include "Mag.h"
 
 class Lilywatch
 {
   public:
     Lilywatch();
+    void setup();
     void run();
     void setState(byte state);
     
+    Colors* getColors();
   private:
     byte state;
-    Config * cfg;
     SoftwareSerial fakeSerial;
+    Config * cfg;
     Colors * colors;
+    
+    Accel * accel;
+    Mag * mag;
     
     byte tickDelay = 15;
 };

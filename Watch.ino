@@ -21,15 +21,9 @@ void loop(){
 	
 }
 /*
-Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(12345);
-Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(54321);
 
 Vcc vcc(VCCCORR);
 
-// Calibration offsets
-float magxOffset = 20;//2.55;
-float magyOffset = 0;//27.95;
-float magzOffset = 20;//27.95;
 
 float ledStrength = 0.05;
 
