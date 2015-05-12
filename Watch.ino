@@ -23,8 +23,6 @@ void loop(){
 /*
 
 
-float ledStrength = 0.05;
-
 byte tickDelay = 15;
 
 //Counts how long you're holding config access
@@ -168,17 +166,6 @@ void loopState(){
 
 // ************************************************************************************************ Rando Funcs ************************************************************************************************* /
 
-void pulseMotor(int strength, int length){
-  analogWrite(MOTOR_PIN, strength);
-  delay(length);
-  analogWrite(MOTOR_PIN, 0);
-}
-void pulseMotorRepeat(int strength, int length, int del, int count){
-  for(int i = 0; i < count; i++){
-    pulseMotor(strength,length);
-    delay(del);
-  }
-}
 
 int cali = 200;
 void compassDirection(int compassHeading) 

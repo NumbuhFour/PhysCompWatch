@@ -6,6 +6,7 @@
 #include "Defines.h"
 #include "Config.h"
 #include "Colors.h"
+#include "Motor.h"
 
 #include "Accel.h"
 #include "Mag.h"
@@ -27,6 +28,7 @@ class Lilywatch
     SoftwareSerial fakeSerial;
     Config * cfg;
     Colors * colors;
+    Motor * motor;
     
     //Sensors
     Accel * accel;
