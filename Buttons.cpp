@@ -18,6 +18,9 @@ void Buttons::check(){
   btn1rel = lbtn1 && !btn1;
   btn2rel = lbtn2 && !btn2;
   bothbtnrel = ((btn1rel && btn2) || (btn2rel && btn1));
+  
+  lbtn1 = btn1;
+  lbtn2 = btn2;
 }
   
 bool Buttons::btnDown(int btn){ //0 or 1 for respective buttons, 2 for both
