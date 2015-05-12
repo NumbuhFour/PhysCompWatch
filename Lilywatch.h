@@ -11,6 +11,7 @@
 #include "Mag.h"
 #include "Buttons.h"
 #include "Light.h"
+#include "Battery.h"
 
 class Lilywatch
 {
@@ -32,6 +33,7 @@ class Lilywatch
     Mag * mag;
     Buttons * btn;
     Light * light;
+    Battery * battery;
     
     byte tickDelay = 15;
 };

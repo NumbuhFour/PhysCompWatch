@@ -22,14 +22,10 @@ void loop(){
 }
 /*
 
-Vcc vcc(VCCCORR);
-
 
 float ledStrength = 0.05;
 
 byte tickDelay = 15;
-
-float batteryLevel = 1.0;
 
 //Counts how long you're holding config access
 int configHoldCounter = 0;
@@ -169,13 +165,6 @@ void loopState(){
       break;
   }
 }
-
-
-float checkBatteryLevel(){
-  batteryLevel = vcc.Read_Perc(VCCMIN,VCCMAX)/100.0;
-  return batteryLevel;
-}
-
 
 // ************************************************************************************************ Rando Funcs ************************************************************************************************* /
 

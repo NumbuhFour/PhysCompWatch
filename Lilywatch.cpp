@@ -9,6 +9,7 @@ Lilywatch::Lilywatch(): fakeSerial(7,8){
   mag = new Mag(this);
   btn = new Buttons();
   light = new Light();
+  battery = new Battery();
   
   this->state = 1;
 }
