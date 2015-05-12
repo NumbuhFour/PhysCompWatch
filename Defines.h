@@ -23,7 +23,7 @@
 #define CONFIG_ACCELRTN   8 	//Go to clock by shake
 #define DATA_START 32
 
-#define VCCMIN   3.8           // Minimum expected Vcc level, in Volts.
+#define VCCMIN   3.4           // Minimum expected Vcc level, in Volts.
 #define VCCMAX   4.19           // Maximum expected Vcc level, in Volts.
 #define VCCCORR  1.0           // Measured Vcc by multimeter divided by reported Vcc
 
