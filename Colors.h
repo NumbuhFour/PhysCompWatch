@@ -21,6 +21,7 @@ private:
   Lilywatch * watch;
 public:
   Colors(Lilywatch * lw);
+  void init();
   void setColor(byte index, uint32_t color);
   void setColor(byte index, byte r, byte g, byte b);
   void setColors(byte indices, byte r, byte g, byte b);

@@ -2,6 +2,9 @@
 #include "Defines.h"
 
 Colors::Colors(Lilywatch* lw): watch(lw), pix(NEO_COUNT, NEO_PIN, NEO_GRB + NEO_KHZ800){
+}
+
+void Colors::init(){
   for(byte i = 0; i < NEO_COUNT; i++) colors[0] = this->pix.Color(0,0,0);
   this->pix.begin();
   this->pix.show(); // Initialize all pixels to 'off'

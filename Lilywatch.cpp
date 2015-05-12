@@ -15,6 +15,11 @@ void Lilywatch::setup(){
   
   fakeSerial.begin(9600);
   Serial.begin(9600);
+  
+  colors->init();
+  accel->init();
+  mag->init();
+  btn->init();
 }
 
 void Lilywatch::run(){
