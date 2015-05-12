@@ -168,26 +168,6 @@ void setBrightnessState(){
   }
 }
 
-void configState(){
-  setColors(127, 100,170,170);
-  setColors(configFlags,  255,60,0);
-  
-  if(millis() % 1000 > 500)
-    setColors(1<<genNum, 255,255,0);
-  
-  if(bothbtnrel){
-    configFlags ^= 1 << genNum;
-    
-    wearLeveling.open(CONFIGVAR_START); //Save to eeprom
-    wearLeveling.writeRec(WL_REC configFlags);
-  }else if(btn1rel){
-    genNum = (genNum+1)%7;
-  }else if(btn2rel){
-    genNum --;
-    if(genNum < 0) genNum = 6;
-  }
-}
-
 void alarmState(){
   uint16_t i;
   for(byte i=0; i< NEO_COUNT; i++) {
