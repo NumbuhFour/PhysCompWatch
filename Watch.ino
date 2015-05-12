@@ -30,7 +30,6 @@ int genNum = 0;
 
 void setup() {
   
-  startupFlash();
   //Serial.println("Startup complete.");
 }
 

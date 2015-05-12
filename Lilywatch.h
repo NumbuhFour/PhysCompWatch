@@ -20,7 +20,7 @@ class Lilywatch
     Lilywatch();
     void setup();
     void run();
-    void setState(byte state);
+    void setState(int state);
     
     Config* getConfig();
     Colors* getColors();
@@ -32,6 +32,9 @@ class Lilywatch
     Light* getLight();
     Battery* getBattery();
   private:
+    void loopState(); // Let's the current app run
+    void loopDaemons(); // Daemons always run
+  
     SoftwareSerial fakeSerial;
     Config * cfg;
     Colors * colors;
