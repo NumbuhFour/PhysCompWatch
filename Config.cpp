@@ -11,8 +11,47 @@ byte reader(unsigned long address){
   return EEPROM.read(address);
 }
 
-Config::Config(Lilywatch lw): wearLeveling(&writer, &reader), watch(lw){
-	this->configFlags = 1;
+Config::Config(Lilywatch* lw): wearLeveling(&writer, &reader), watch(lw){
+  this->configFlags = 1;  //Loading EEPROM data
+  
+  TIMEEEVAR_START = DATA_START;
+  if(wearLeveling.exists(TIMEEEVAR_START) == WL_NOK){
+    //Serial.println("Time var does not exist");
+    //Create it at timeEEVar_Start position with WL_XX length where XX is status length 8,16,24,32,64
+    wearLeveling.create(TIMEEEVAR_START, WL_16, sizeof(_timeEEVar));
+    wearLeveling.clear();
+    
+    //Write new data to the var
+    _timeEEVar.hours = hour();
+    _timeEEVar.mins = minute();
+    wearLeveling.open(TIMEEEVAR_START);
+    wearLeveling.writeRec(WL_REC _timeEEVar);
+  }else{
+    //Serial.println("Time var exists.");
+    wearLeveling.open(TIMEEEVAR_START);
+    wearLeveling.readRec(WL_REC _timeEEVar);
+    
+    //Serial.print("Time set to ");
+    //Serial.print(_timeEEVar.hours);
+    //Serial.print(":");
+    //Serial.println(_timeEEVar.mins);
+    setTime(_timeEEVar.hours, _timeEEVar.mins,0,0,0,0);
+  }
+  
+  CONFIGVAR_START = TIMEEEVAR_START + wearLeveling.memSize();
+  if(wearLeveling.exists(CONFIGVAR_START)==WL_NOK){
+    //Serial.println("configVar does not exist");
+    wearLeveling.create(CONFIGVAR_START, WL_8, sizeof(configFlags));
+    wearLeveling.clear();
+    
+    configFlags = 1;
+    wearLeveling.open(CONFIGVAR_START);
+    wearLeveling.writeRec(WL_REC configFlags); 
+  }else{
+    //Serial.println("Config var exists");
+    wearLeveling.open(CONFIGVAR_START);
+    wearLeveling.readRec(WL_REC configFlags);
+  }
 }
 
 

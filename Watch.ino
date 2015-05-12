@@ -7,6 +7,7 @@
 #include <wl.h>
 #include <Vcc.h>
 #include <SoftwareSerial.h>  
+#include "Lilywatch.h"
 
 #define NEO_COUNT   7
 
@@ -24,17 +25,26 @@
 #define UNITY_STATE 7
 #define BATTERY_STATE 3
 
+#define CONFIG_LIGHTLEVEL 1 	//Light level auto-changes
+#define CONFIG_BLUETOOTH  2 	//Pay attention to bluetooth messages
+#define CONFIG_BATTWARN   4 	//Warn when battery low
+#define CONFIG_ACCELRTN   8 	//Go to clock by shake
 #define DATA_START 32
-
-#define CONFIG_LIGHTLEVEL 1 //Light level auto-changes
-#define CONFIG_BLUETOOTH  2 //Pay attention to bluetooth messages
-#define CONFIG_BATTWARN   4 //Warn when battery low
-#define CONFIG_ACCELRTN   8    //Go to clock by shake
 
 #define VCCMIN   3.8           // Minimum expected Vcc level, in Volts.
 #define VCCMAX   4.19           // Maximum expected Vcc level, in Volts.
 #define VCCCORR  1.0           // Measured Vcc by multimeter divided by reported Vcc
 
+Lilywatch watch;
+
+void setup(){
+	
+}
+
+void loop(){
+	
+}
+/*
 
 Adafruit_NeoPixel pix = Adafruit_NeoPixel(NEO_COUNT, NEO_PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(12345);
@@ -83,16 +93,6 @@ bool messageWaiting = false;
 bool batteryChecked = false;
 bool batteryWarning = false;
 
-struct timeEEVar{
-  byte hours;
-  byte mins;
-} _timeEEVar;
-long TIMEEEVAR_START;
-
-byte configFlags = 1;
-long CONFIGVAR_START;
-
-wl wearLeveling(&writer, &reader);
 //Generic global number, reset each state switch
 int genNum = 0;
 
@@ -107,21 +107,8 @@ void setup() {
   
   fakeSerial.begin(9600);
   
-  /*Serial.begin(115200); // The Bluetooth Mate defaults to 115200bps
-  Serial.print("$");  // Print three times individually
-  Serial.print("$");
-  Serial.print("$");  // Enter command mode
-  delay(1000);  // Short delay, wait for the Mate to send back CMD
-  Serial.println("U,9600,N");*/
-  Serial.begin(9600);
-  /*bluetooth.begin(115200);  // The Bluetooth Mate defaults to 115200bps
-  bluetooth.print("$");  // Print three times individually
-  bluetooth.print("$");
-  bluetooth.print("$");  // Enter command mode
-  delay(100);  // Short delay, wait for the Mate to send back CMD
-  bluetooth.println("U,9600,N");  // Temporarily Change the baudrate to 9600, no parity
-  // 115200 can be too fast at times for NewSoftSerial to relay the data reliably
-  bluetooth.begin(9600);*/  // Start bluetooth serial at 9600
+  
+  Serial.begin(9600); serial at 9600
   //while(!Serial); //Wait for serial to get ready?
   //Serial.print("$");  // Print three times individually
   //Serial.print("$");
@@ -138,7 +125,6 @@ void setup() {
   pix.show(); // Initialize all pixels to 'off'
   
   
-  /* Initialise the sensor */
   if(!mag.begin() || !accel.begin())
   {
     // There was a problem detecting the LSM303 ... check your connections 
@@ -154,46 +140,7 @@ void setup() {
     }
   }
   
-  //Loading EEPROM data
-  
-  TIMEEEVAR_START = DATA_START;
-  if(wearLeveling.exists(TIMEEEVAR_START) == WL_NOK){
-    //Serial.println("Time var does not exist");
-    //Create it at timeEEVar_Start position with WL_XX length where XX is status length 8,16,24,32,64
-    wearLeveling.create(TIMEEEVAR_START, WL_16, sizeof(_timeEEVar));
-    wearLeveling.clear();
-    
-    //Write new data to the var
-    _timeEEVar.hours = hour();
-    _timeEEVar.mins = minute();
-    wearLeveling.open(TIMEEEVAR_START);
-    wearLeveling.writeRec(WL_REC _timeEEVar);
-  }else{
-    //Serial.println("Time var exists.");
-    wearLeveling.open(TIMEEEVAR_START);
-    wearLeveling.readRec(WL_REC _timeEEVar);
-    
-    //Serial.print("Time set to ");
-    //Serial.print(_timeEEVar.hours);
-    //Serial.print(":");
-    //Serial.println(_timeEEVar.mins);
-    setTime(_timeEEVar.hours, _timeEEVar.mins,0,0,0,0);
-  }
-  
-  CONFIGVAR_START = TIMEEEVAR_START + wearLeveling.memSize();
-  if(wearLeveling.exists(CONFIGVAR_START)==WL_NOK){
-    //Serial.println("configVar does not exist");
-    wearLeveling.create(CONFIGVAR_START, WL_8, sizeof(configFlags));
-    wearLeveling.clear();
-    
-    configFlags = 1;
-    wearLeveling.open(CONFIGVAR_START);
-    wearLeveling.writeRec(WL_REC configFlags); 
-  }else{
-    //Serial.println("Config var exists");
-    wearLeveling.open(CONFIGVAR_START);
-    wearLeveling.readRec(WL_REC configFlags);
-  }
+
   
   lastMin = minute();
   
@@ -274,25 +221,6 @@ void loop() {
    digitalWrite(13,HIGH);
 }
 
-void writer(unsigned long address, byte data)
-{
-  EEPROM.write(address,data);
-}
-
-byte reader(unsigned long address){
-  return EEPROM.read(address);
-}
-
-void writeClockToEEPROM(){
-  _timeEEVar.hours = hour();
-  _timeEEVar.mins = minute();
-  //Serial.print("Writing time to EEPROM ");
-  //Serial.print(_timeEEVar.hours);
-  //Serial.print(":");
-  //Serial.println(_timeEEVar.mins);
-  wearLeveling.open(TIMEEEVAR_START);
-  wearLeveling.writeRec(WL_REC _timeEEVar);
-}
 
 void setColor(byte index, uint32_t color){
   colors[index] = color;
@@ -378,7 +306,7 @@ float checkBatteryLevel(){
 }
 
 
-/************************************************************************************************ Rando Funcs *************************************************************************************************/
+// ************************************************************************************************ Rando Funcs ************************************************************************************************* /
 void startupFlash(){
  for(byte i = 0; i < NEO_COUNT+3; i++){
    if(i > 2) setColor(i-3, 0,0,0);
@@ -511,7 +439,6 @@ void compassCheck() {
 
   // approximately every 10 seconds or so, update time
   //if (millis() - compassTimer > 50) {
-    /* Get a new sensor event */
     sensors_event_t event; 
     mag.getEvent(&event);
 
@@ -550,12 +477,12 @@ void accelCheck(){
 int cali = 200;
 void compassDirection(int compassHeading) 
 {
-  /*Serial.print(" Direction: ");
+  / *Serial.print(" Direction: ");
   Serial.print(compassHeading);
   Serial.print(" Calibration: ");
   Serial.print(cali);
   Serial.print(" Doop: ");
-  Serial.println(compassHeading + cali);*/
+  Serial.println(compassHeading + cali);* /
   
   if(btn1rel){
     cali += 10;
@@ -582,8 +509,8 @@ void compassDirection(int compassHeading)
   ledDir = compassHeading / 25;
   
   if(ledDir >= NEO_COUNT){
-    /*Serial.print("LED ERROR ");
-    Serial.println(ledDir);*/
+    / *Serial.print("LED ERROR ");
+    Serial.println(ledDir);* /
     setColor(0, 255,0,0);
     setColor(6, 255,0,0);
     //setColors(127, 255,0,0);
@@ -593,7 +520,7 @@ void compassDirection(int compassHeading)
 }
 
 
-/************************************************** STATES ************************************************************************************************************************/
+// ************************************************** STATES ************************************************************************************************************************ /
 
 
 //NOT A STATE. Defined here for access to state globals
@@ -607,8 +534,8 @@ void setState(int s){
   clearColors();
   btn1rel = btn2rel = false;
   analogWrite(MOTOR_PIN,0);
-  /*Serial.print("State changed to ");
-  Serial.println(s);*/
+  / *Serial.print("State changed to ");
+  Serial.println(s);* /
   
   while(btn1 || btn2) {
     checkButtons(); 
@@ -871,7 +798,7 @@ void unityState(){
   //Serial.println(output);
 }
 
-/************************************************** DAEMONS **************************************************/
+/ ************************************************** DAEMONS ************************************************** /
 
 float lastLightLevel[3];
 byte lastLightLevelIndex = 0;
@@ -948,4 +875,4 @@ void handleMessage(String msg){
     Serial.println("Bluetooth signal ignored.");
   }
 }
-
+*/
