@@ -3,7 +3,7 @@
 
 /*
   Mag.h
-  Manages the LSM303 Magnetometer for the Lilywatch
+  Manages the buttons for the Lilywatch
 */
 #include "Arduino.h"
 #include "Defines.h"

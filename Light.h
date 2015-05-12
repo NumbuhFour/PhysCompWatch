@@ -3,7 +3,7 @@
 
 /*
   Accel.h
-  Manages the LSM303 Accelerometer for the Lilywatch
+  Manages the photoresistor for the Lilywatch
 */
 #include "Arduino.h"
 #include "Defines.h"
