@@ -26,6 +26,7 @@ private:
 public:
   Mag(Lilywatch * lw);
   void init();
+  void check();
   
   float* getData();
 };

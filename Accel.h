@@ -22,6 +22,7 @@ private:
 public:
   Accel(Lilywatch * lw);
   void init();
+  void check();
   
   float* getData();
 };

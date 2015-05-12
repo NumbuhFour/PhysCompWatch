@@ -26,6 +26,24 @@ void Mag::init(){
   }
 }
 
+void Mag::check(){
+  sensors_event_t event; 
+  mag.getEvent(&event);
+
+  float Pi = 3.14159;
+  
+  mx = event.magnetic.x+magxOffset;
+  my = event.magnetic.y+magyOffset;
+  mz = event.magnetic.z+magzOffset;
+  float heading = (atan2(my + magyOffset,mx + magxOffset) * 180) / Pi;
+  // Normalize to 0-360
+  if (heading < 0)
+  {
+    heading = 360 + heading;
+  }
+  compassReading = heading; 
+}
+
 float* Mag::getData(){
   float rtn[] = {mx,my,mz};
   return rtn;
