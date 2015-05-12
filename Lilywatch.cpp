@@ -1,8 +1,8 @@
 #include "Lilywatch.h"
 
-Lilywatch::Lilywatch(): fakeSerial(7,8),
-                        pix(NEO_COUNT, NEO_PIN, NEO_GRB + NEO_KHZ800){
+Lilywatch::Lilywatch(): fakeSerial(7,8){
   cfg = new Config(this);
+  colors = new Colors(this);
   this->state = 1;
   
   pinMode(BTN1_PIN, INPUT);
@@ -13,8 +13,6 @@ Lilywatch::Lilywatch(): fakeSerial(7,8),
   
   fakeSerial.begin(9600);
   Serial.begin(9600);
-  
-  for(byte i = 0; i < NEO_COUNT; i++) colors[0] = this->pix.Color(0,0,0);
 }
 
 void Lilywatch::run(){

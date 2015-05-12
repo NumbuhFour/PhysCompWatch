@@ -1,39 +1,15 @@
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_LSM303_U.h>
-#include <Adafruit_NeoPixel.h>
 #include <Time.h>
 #include <EEPROM.h>
 #include <wl.h>
 #include <Vcc.h>
 #include <SoftwareSerial.h>  
+
+
+
 #include "Lilywatch.h"
-
-#define NEO_COUNT   7
-
-#define NEO_PIN    12
-#define BTN1_PIN   16 //Left button
-#define BTN2_PIN    3  //Right button
-#define MOTOR_PIN  10 //Vibration motor
-#define PHOTO_PIN   0
-#define PIEZO_PIN   6
-
-#define STATES      10
-#define CLOCK_STATE 0
-#define ALARM_STATE 64
-#define ANDROID_STATE 63
-#define UNITY_STATE 7
-#define BATTERY_STATE 3
-
-#define CONFIG_LIGHTLEVEL 1 	//Light level auto-changes
-#define CONFIG_BLUETOOTH  2 	//Pay attention to bluetooth messages
-#define CONFIG_BATTWARN   4 	//Warn when battery low
-#define CONFIG_ACCELRTN   8 	//Go to clock by shake
-#define DATA_START 32
-
-#define VCCMIN   3.8           // Minimum expected Vcc level, in Volts.
-#define VCCMAX   4.19           // Maximum expected Vcc level, in Volts.
-#define VCCCORR  1.0           // Measured Vcc by multimeter divided by reported Vcc
 
 Lilywatch watch;
 
@@ -45,8 +21,6 @@ void loop(){
 	
 }
 /*
-
-Adafruit_NeoPixel pix = Adafruit_NeoPixel(NEO_COUNT, NEO_PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(12345);
 Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(54321);
 
@@ -57,7 +31,6 @@ float magxOffset = 20;//2.55;
 float magyOffset = 0;//27.95;
 float magzOffset = 20;//27.95;
 
-uint32_t colors[NEO_COUNT];
 float ledStrength = 0.05;
 
 byte tickDelay = 15;
@@ -96,29 +69,8 @@ bool batteryWarning = false;
 //Generic global number, reset each state switch
 int genNum = 0;
 
-SoftwareSerial fakeSerial(7,8); //tx.rx
-//SoftwareSerial bluetooth(0, 1);
 void setup() {
-  pinMode(BTN1_PIN, INPUT);
-  pinMode(BTN2_PIN, INPUT);
-  pinMode(MOTOR_PIN, OUTPUT);
-  pinMode(13, OUTPUT);
-  digitalWrite(13, HIGH); //Power notifier
   
-  fakeSerial.begin(9600);
-  
-  
-  Serial.begin(9600); serial at 9600
-  //while(!Serial); //Wait for serial to get ready?
-  //Serial.print("$");  // Print three times individually
-  //Serial.print("$");
-  //Serial.print("$");  // Enter command mode
-  //delay(100);  // Short delay, wait for the Mate to send back CMD
-  //Serial.println("U,9600,N");  // Temporarily Change the baudrate to 9600, no parity
-  // 115200 can be too fast at times for NewSoftSerial to relay the data reliably
-  //Serial.begin(9600);  // Start bluetooth serial at 9600
-  
-  for(byte i = 0; i < NEO_COUNT; i++) colors[0] = pix.Color(0,0,0);
   
   
   pix.begin();
@@ -222,35 +174,6 @@ void loop() {
 }
 
 
-void setColor(byte index, uint32_t color){
-  colors[index] = color;
-}
-void setColor(byte index, byte r, byte g, byte b){
-  colors[index] = pix.Color((byte)((float)r * ledStrength),
-                            (byte)((float)g * ledStrength),
-                            (byte)((float)b * ledStrength));
-}
-void setColors(byte indicies, byte r, byte g, byte b){
-  for(byte i = 0; i < NEO_COUNT; i++){
-    if(indicies & 1 == 1){ //Lit at that index
-      colors[i] = pix.Color((byte)((float)r * ledStrength),
-                                (byte)((float)g * ledStrength),
-                                (byte)((float)b * ledStrength));
-    }
-    indicies = indicies >> 1;
-  }
-}
-
-void clearColors(){
-  setColors(127, 0,0,0);
-}
-
-void pushColors(){
-  for(byte i = 0; i < NEO_COUNT; i++){
-    pix.setPixelColor(i, colors[i]);
-  }
-  pix.show();
-}
 
 void loopDaemons(){
   autoLightLevel();
