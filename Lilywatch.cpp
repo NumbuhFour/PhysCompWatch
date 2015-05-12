@@ -40,3 +40,6 @@ void Lilywatch::setState(byte s){
 Colors* Lilywatch::getColors(){
   return colors;
 }
+Motor* Lilywatch::getMotor(){
+  return motor;
+}

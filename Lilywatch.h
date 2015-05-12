@@ -23,6 +23,7 @@ class Lilywatch
     void setState(byte state);
     
     Colors* getColors();
+    Motor* getMotor();
   private:
     byte state;
     SoftwareSerial fakeSerial;
