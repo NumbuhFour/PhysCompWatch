@@ -25,3 +25,8 @@ void Accel::init(){
     }
   }
 }
+
+float* Accel::getData(){
+  float rtn[] = {ax,ay,az};
+  return rtn;
+}

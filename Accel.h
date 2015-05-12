@@ -3,8 +3,7 @@
 
 /*
   Accel.h
-  Manages the Neopixel Accel for the Lilywatch
-  Also holds short animation functions
+  Manages the LSM303 Accelerometer for the Lilywatch
 */
 #include "Arduino.h"
 #include "Defines.h"
@@ -19,9 +18,12 @@ class Accel
 private:
   Adafruit_LSM303_Accel_Unified accel;
   Lilywatch * watch;
+  float ax,ay,az;
 public:
   Accel(Lilywatch * lw);
   void init();
+  
+  float* getData();
 };
 
 #endif
