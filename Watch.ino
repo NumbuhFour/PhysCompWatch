@@ -120,56 +120,6 @@ void compassDirection(int compassHeading)
 // ************************************************** STATES ************************************************************************************************************************ /
 
 
-//NOT A STATE. Defined here for access to state globals
-void setState(int s){
-  if(state == ANDROID_STATE && s != ANDROID_STATE){ //Leaving arduino state
-    Serial.println("LEAV");
-  }
-  
-  genNum = 0;
-  state = s;
-  clearColors();
-  btn1rel = btn2rel = false;
-  analogWrite(MOTOR_PIN,0);
-  / *Serial.print("State changed to ");
-  Serial.println(s);* /
-  
-  while(btn1 || btn2) {
-    checkButtons(); 
-    delay(tickDelay);
-  }
-  lbtn1 = lbtn2 = false;
-  bothbtnrel = false;
-  btn1rel = btn2rel = false;
-}
-
-void statePicker(){
-  if(!buttonsReleased){
-    buttonsReleased = !btn1 && !lbtn1 && !btn2 && !lbtn2;
-    return;
-  }
-  
-  
-  if(bothbtnrel){ //both buttons released
-    if(genNum < STATES){
-      confirmFlash();
-      setState(genNum);
-    }else{
-      errorFlash();
-      genNum = 0;
-      clearColors();
-    }
-  }else if(btn1rel){ //left button released
-    genNum ++;
-    if(genNum > 127) genNum = 0;
-  }else if(btn2rel){ //right button released
-    genNum --;
-    if(genNum < 0) genNum = 127;
-  } 
-  setColors(127, 100,100,100);
-  setColors(genNum, 255,0,255);
-}
-
 //Sets pretty colors. Taken from neopixel example
 void screensaver(){
   uint16_t i;

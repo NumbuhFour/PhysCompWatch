@@ -15,6 +15,8 @@
 #include "Light.h"
 #include "Battery.h"
 
+#include "SelectorState.h"
+
 class Lilywatch
 {
   public:
@@ -36,7 +38,8 @@ class Lilywatch
     void loopState(); // Let's the current app run
     void loopDaemons(); // Daemons always run
   
-    WatchState * states[STATES];
+    WatchState * states[STATES] = {0};
+    SelectorState * selState;
     SoftwareSerial fakeSerial;
     Config * cfg;
     Colors * colors;
@@ -61,7 +64,7 @@ class Lilywatch
     //Counts how long you're holding selector access
     int selectorHoldCounter = 0;
 
-    int state = CLOCK_STATE;//What function state we are currently in
+    int state = 0;//What function state we are currently in
 
     //Config waits for buttons to be released first
     bool buttonsReleased = false;

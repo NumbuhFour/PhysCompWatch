@@ -15,9 +15,10 @@ Lilywatch::Lilywatch(): fakeSerial(7,8){
   light = new Light();
   battery = new Battery();
   
-  this->state = 1;
+  this->state = 0;
   
   //Making states
+  selState = new SelectorState(this);
   states[0] = new ButtonPlayState(this);
 }
 
@@ -117,16 +118,46 @@ void Lilywatch::run(){
 }
 
 void Lilywatch::loopState(){
-  states[0]->run();
+  if(state == -1) selState->run();
+  else if(states[state] != 0){
+    states[state]->run();
+  }else{
+    colors->errorFlash();
+    setState(-1);//Move back to selector if problem
+  }
 }
 
 void Lilywatch::loopDaemons(){
   
 }
 
+//Handles switching between state
 void Lilywatch::setState(int s){
+  if(state != -1 && states[state] != 0){
+    states[state]->stop();
+  }
   
+  state = s;
+  colors->clearColors();
+
+  analogWrite(MOTOR_PIN,0);
+  
+  //Wait until buttons are released
+  //So that the new state won't come in with a button already down
+  while(btn->btnDown(0) || btn->btnDown(1)) {
+    btn->check(); 
+    delay(tickDelay);
+  }
+  btn->check(); //To make sure none are set as just released
+  
+  if(s != -1){
+    selState->start();
+  } else if(states[s] != 0){
+    states[s]->start();
+  }
 }
+
+//Getters
 
 Config* Lilywatch::getConfig(){
   return cfg;
