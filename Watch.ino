@@ -147,53 +147,6 @@ void flashlight(){
   
 }
 
-byte minSet=1;
-byte hourSet=1;
-void setTimeState(){
-  if(genNum == 0){
-    minSet = minute();
-    hourSet = hour();
-    genNum++;
-  }if(genNum == 1){//Setting hour
-    if(bothbtnrel){ //right button released
-      genNum ++;
-    }else if(btn1rel){ //left button released
-      hourSet ++;
-      if(hourSet >= 24) hourSet = 1;
-    } else if(btn2rel){ //right button released
-      hourSet --;
-      if(hourSet < 1) hourSet = 24;
-    }
-    setColors(127, 100,100,100);
-    setColors(hourSet, 255,255,0);
-    
-  }else if(genNum == 2){//Waiting for both buttons released
-    if(!btn1 && !btn2 && !lbtn1 && !lbtn2)
-      genNum ++;
-  }else if(genNum == 3){//Setting minute
-    if(bothbtnrel){ //right button released
-      setTime(hourSet, minSet, 0,0,0,0);
-      setState(CLOCK_STATE);
-      
-      hourSet = 1;
-      minSet = 1;
-    }else  if(btn1rel){ //left button released
-      minSet ++;
-      if(minSet >= 60) minSet = 1;
-    }else if(btn2rel){ //right button released
-      minSet --;
-      if(minSet < 1) minSet = 59;
-    }
-    setColors(127, 100,100,100);
-    setColors(minSet, 0,255,255);
-  }
-}
-
-bool showClock = true;
-void clockState(){
-  
-}
-
 void setBrightnessState(){
   if(bothbtnrel){ //Confirmation with both buttons
     confirmFlash();
