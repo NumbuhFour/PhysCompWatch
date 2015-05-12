@@ -2,16 +2,11 @@
 #define Buttons_h
 
 /*
-  Mag.h
+  Buttons.h
   Manages the buttons for the Lilywatch
 */
 #include "Arduino.h"
 #include "Defines.h"
-#include <Wire.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_LSM303_U.h>
-
-class Lilywatch;
 
 class Buttons
 {

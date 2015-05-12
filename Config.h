@@ -1,6 +1,12 @@
 #ifndef Config_h
 #define Config_h
 
+/*
+  Config.h
+  Manages the EEPROM stored configuration and time information
+*/
+
+
 #include "Arduino.h"
 #include <EEPROM.h>
 #include <wl.h>

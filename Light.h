@@ -2,13 +2,11 @@
 #define Light_h
 
 /*
-  Accel.h
+  Light.h
   Manages the photoresistor for the Lilywatch
 */
 #include "Arduino.h"
 #include "Defines.h"
-
-class Lilywatch;
 
 class Light
 {
