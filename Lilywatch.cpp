@@ -4,6 +4,7 @@ Lilywatch::Lilywatch(): fakeSerial(7,8){
   cfg = new Config(this);
   colors = new Colors(this);
   accel = new Accel(this);
+  mag = new Mag(this);
   this->state = 1;
 }
 
