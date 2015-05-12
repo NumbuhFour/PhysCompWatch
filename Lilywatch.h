@@ -22,8 +22,15 @@ class Lilywatch
     void run();
     void setState(byte state);
     
+    Config* getConfig();
     Colors* getColors();
     Motor* getMotor();
+    
+    Accel* getAccel();
+    Mag* getMag();
+    Buttons* getButtons();
+    Light* getLight();
+    Battery* getBattery();
   private:
     byte state;
     SoftwareSerial fakeSerial;

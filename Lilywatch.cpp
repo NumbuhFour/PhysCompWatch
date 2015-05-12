@@ -27,6 +27,8 @@ void Lilywatch::setup(){
   accel->init();
   mag->init();
   btn->init();
+  light->init();
+  battery->init();
 }
 
 void Lilywatch::run(){
@@ -37,9 +39,29 @@ void Lilywatch::setState(byte s){
   
 }
 
+Config* Lilywatch::getConfig(){
+  return cfg;
+}
 Colors* Lilywatch::getColors(){
   return colors;
 }
 Motor* Lilywatch::getMotor(){
   return motor;
+}
+
+//Sensors
+Accel* Lilywatch::getAccel(){
+  return accel;
+}
+Mag* Lilywatch::getMag(){
+  return mag;
+}
+Buttons* Lilywatch::getButtons(){
+  return btn;
+}
+Light* Lilywatch::getLight(){
+  return light;
+}
+Battery* Lilywatch::getBattery(){
+  return battery;
 }
