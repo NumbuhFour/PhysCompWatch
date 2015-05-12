@@ -9,8 +9,6 @@ Lilywatch::Lilywatch(): fakeSerial(7,8){
 }
 
 void Lilywatch::setup(){
-  pinMode(BTN1_PIN, INPUT);
-  pinMode(BTN2_PIN, INPUT);
   pinMode(MOTOR_PIN, OUTPUT);
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH); //Power notifier

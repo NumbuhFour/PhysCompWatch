@@ -29,14 +29,6 @@ float ledStrength = 0.05;
 
 byte tickDelay = 15;
 
-bool btn1 = false;
-bool lbtn1 = false; //Last value of btn1
-bool btn2 = false;
-bool lbtn2 = false; //Last value of btn2
-bool btn1rel = false; //Buttons released
-bool btn2rel = false;
-bool bothbtnrel = false; //Both buttons released at about the same time
-
 float batteryLevel = 1.0;
 
 //Counts how long you're holding config access

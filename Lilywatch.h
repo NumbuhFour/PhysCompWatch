@@ -9,6 +9,7 @@
 
 #include "Accel.h"
 #include "Mag.h"
+#include "Buttons.h"
 
 class Lilywatch
 {
@@ -27,6 +28,7 @@ class Lilywatch
     
     Accel * accel;
     Mag * mag;
+    Buttons * btn;
     
     byte tickDelay = 15;
 };
