@@ -1,5 +1,7 @@
 #include "Colors.h"
 #include "Defines.h"
+#include "Lilywatch.h"
+#include "Battery.h"
 
 Colors::Colors(Lilywatch* lw): watch(lw), pix(NEO_COUNT, NEO_PIN, NEO_GRB + NEO_KHZ800){
 }
@@ -75,7 +77,7 @@ void Colors::startupFlash(){
   delay(80);
   setColor(NEO_COUNT-1, 0,0,0);
   pushColors();
-  //watch->pulseMotorRepeat(1023,150,100,2);
+  watch->getMotor()->pulseMotorRepeat(1023,150,100,2);
 }
 
 void Colors::errorFlash(){
@@ -103,7 +105,7 @@ void Colors::confirmFlash(){
     clearColors();
     setColors(42,0,255,0);
     pushColors();
-    //pulseMotor(1023, 150);
+    watch->getMotor()->pulseMotor(1023, 150);
     delay(50);
 }
 
@@ -111,13 +113,15 @@ void Colors::messageFlash(){
   for(byte i = 0; i < NEO_COUNT; i++)
     setColor(i, Wheel(((i * 256 / NEO_COUNT) + 5) & 255));
   pushColors();
-  //watch->pulseMotorRepeat(1023,150,50,2);
-  //watch->pulseMotor(1023, 250);
+  watch->getMotor()->pulseMotorRepeat(1023,150,50,2);
+  watch->getMotor()->pulseMotor(1023, 250);
   delay(50);
 }
 
 void Colors::displayBatteryColors(){
-  /*float batt = checkBatteryLevel();
+  Battery * battery = watch->getBattery();
+  battery->check();
+  float batt = battery->getData();
   for(float i = 0; i < NEO_COUNT; i++){
     float p = (i+1)/NEO_COUNT;
     if(p <= batt){ //Light on!
@@ -131,7 +135,7 @@ void Colors::displayBatteryColors(){
     }else{
       setColor((byte)i, 0,0,0);
     }
-  }*/
+  }
 }
 
 
