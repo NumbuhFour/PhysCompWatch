@@ -156,27 +156,6 @@ void setBrightnessState(){
   }
 }
 
-void alarmState(){
-  uint16_t i;
-  for(byte i=0; i< NEO_COUNT; i++) {
-    setColor(i, Wheel(((i * 256 / NEO_COUNT) + genNum) & 255));
-  }
-  genNum += 20;
-  if(genNum>256*5) genNum=0;
-  
-  unsigned long mil = millis();
-  if(mil%7000 < 5000 && (mil%7000)%2000 < 1000){
-     analogWrite(MOTOR_PIN, 1023);
-  }else{
-     analogWrite(MOTOR_PIN, 0);
-  }
-  
-  if(btn1 && btn2){
-    Serial.print("ALSTP");
-    setState(CLOCK_STATE);
-  }
-}
-
 void showBatteryState(){
   displayBatteryColors();
   Serial.print("Battery ");
