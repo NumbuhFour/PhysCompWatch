@@ -23,7 +23,7 @@ void loop(){
   
 	//Power light. If things are frozen, light should remain on.
 	digitalWrite(13,LOW);
-	delay(50);
+	delay(15);
 }
 /*
 

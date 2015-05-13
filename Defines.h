@@ -11,7 +11,7 @@
 #define PIEZO_PIN   6
 
 #define STATES      10
-#define DAEMONS     1
+#define DAEMONS     2
 
 #define CLOCK_STATE 0
 #define ALARM_STATE 64

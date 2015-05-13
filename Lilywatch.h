@@ -26,6 +26,7 @@ class Lilywatch
     void run();
     void setState(int state);
     
+    int getState();
     Config* getConfig();
     Colors* getColors();
     Motor* getMotor();
@@ -35,6 +36,8 @@ class Lilywatch
     Buttons* getButtons();
     Light* getLight();
     Battery* getBattery();
+    
+    void setMessageWaiting(bool);
   private:
     void loopState(); // Let's the current app run
     void loopDaemons(); // Daemons always run

@@ -13,6 +13,7 @@
 
 
 #include "LightLevelDaemon.cpp"
+#include "BluetoothDaemon.cpp"
 
 Lilywatch::Lilywatch(): fakeSerial(7,8){
   cfg = new Config(this);
@@ -42,6 +43,7 @@ Lilywatch::Lilywatch(): fakeSerial(7,8){
   
   //Daemons
   daemons[0] = new LightLevelDaemon(this);
+  daemons[1] = new BluetoothDaemon(this);
 }
 
 void Lilywatch::setup(){
@@ -180,7 +182,17 @@ void Lilywatch::setState(int s){
   }
 }
 
+//Setters
+
+void Lilywatch::setMessageWaiting(bool val){
+  messageWaiting = val;
+}
+
 //Getters
+
+int Lilywatch::getState(){
+  return state;
+}
 
 Config* Lilywatch::getConfig(){
   return cfg;
