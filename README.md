@@ -9,3 +9,4 @@ Required libraries:
  - [Adafruit NeoPixel Library](https://github.com/adafruit/Adafruit_NeoPixel)
  - [Arduino wear leveling](https://github.com/drjoju/Arduino-wear-leveling)
  - [VCC Supply level checking](https://github.com/Yveaux/arduino_vcc)
+ - [IR Remote](https://github.com/shirriff/Arduino-IRremote)
