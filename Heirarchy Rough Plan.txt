@@ -1,0 +1,69 @@
+Lilywatch
+	:getButtons
+	:getAccel
+	:getMag
+	:getLight
+	:getBattery
+	:getColor
+	pulseMotor
+	pulseMotorRepeat
+	setMotor
+
+WatchState:
+	-start
+	-run
+	-stop
+
+Daemon:
+	-Init
+	-Run
+	-shouldRun
+	
+ConfigManager
+	-isEnabled(byte)
+
+Button:
+	-getButton(byte b) //0, 1, 2 for both
+	-getButtonRel(byte b)
+	-Init
+	-Check
+
+Accel: //Smooth data too
+	-Init
+	-Check
+	-getData(): [ax,ay,az]
+
+Mag: //Smooth data too
+	-Init
+	-Check
+	-getData(): [ax,ay,az]
+
+Light:
+	Init
+	Check
+	getData(); //int
+
+Battery:
+	Init
+	Check
+	getData();
+
+Colors(Lilywatch)(
+	setColor
+	setColors
+	pushColors
+	clearColors
+	confirmFlash
+	warningFlash
+	errorFlash
+	
+
+States:
+	Compass
+	Show battery
+	AndroidState
+	Unity state
+	
+Daemons:
+	Check Bluetooth
+	Check brightness
