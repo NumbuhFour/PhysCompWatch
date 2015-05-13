@@ -29,8 +29,8 @@ Lilywatch::Lilywatch(): fakeSerial(7,8){
   selState = new SelectorState(this);
   states[0] = new ClockState(this);
   states[1] = new ButtonPlayState(this);
-  states[2] = new ShowBatteryState(this);
-  states[3] = new FlashlightState(this);
+  states[2] = new FlashlightState(this);
+  states[3] = new ShowBatteryState(this);
   states[4] = new ConfigState(this);
   states[5] = new SetClockState(this);
   states[6] = new SetBrightnessState(this);
@@ -84,19 +84,21 @@ void Lilywatch::run(){
   }
   
   //Return to watch on shake
-  /*if(cfg->checkFlag(CONFIG_ACCELRTN) && accelReturnDelay == 0){
-    accelCheck();
-    if(az > 19.5){
-      confirmFlash();
+  if(cfg->checkFlag(CONFIG_ACCELRTN)){
+    accel->check();
+    float az = accel->getAZ();
+    if(az > 19.5 && accelReturnDelay == 0){
+      accelReturnDelay = 200;
+      colors->confirmFlash();
       if(state == CLOCK_STATE)
         setState(BATTERY_STATE);
       else
         setState(CLOCK_STATE);
     }
   }
-  accelReturnDelay = max(accelReturnDelay-1,0);*/
+  accelReturnDelay = max(accelReturnDelay-tickDelay,0);
   
-  if(btn->btnDown(0) || btn->btnDown(1)) messageWaiting = false;
+  //if(btn->btnDown(0) || btn->btnDown(1)) messageWaiting = false;
   
   loopState();
   
@@ -125,11 +127,6 @@ void Lilywatch::run(){
   }
   
   colors->pushColors();
-  digitalWrite(13,LOW);
-  delay(tickDelay);
-  
-   //Power light. If things are frozen, light should remain on.
-   digitalWrite(13,HIGH);
   
 }
 

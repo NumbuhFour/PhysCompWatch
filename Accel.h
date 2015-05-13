@@ -18,13 +18,17 @@ class Accel
 private:
   Adafruit_LSM303_Accel_Unified accel;
   Lilywatch * watch;
-  float ax,ay,az;
+  sensors_event_t event;
+  float ax=0,ay=0,az=0;
 public:
   Accel(Lilywatch * lw);
   void init();
   void check();
   
   float* getData();
+  float getAX();
+  float getAY();
+  float getAZ();
 };
 
 #endif

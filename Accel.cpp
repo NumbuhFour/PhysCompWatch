@@ -27,15 +27,19 @@ void Accel::init(){
 }
 
 void Accel::check(){
-  sensors_event_t event;
   accel.getEvent(&event);
   
   ax = event.acceleration.x;
   ay = event.acceleration.y;
   az = event.acceleration.z;
 }
-
-float* Accel::getData(){
-  float rtn[] = {ax,ay,az};
+float Accel::getAX(){return ax;}
+float Accel::getAY(){return ay;}
+float Accel::getAZ(){return az;}
+float* Accel::getData(){ //BOOOORKED
+  float* rtn = new float[3];
+  rtn[0] = ax;
+  rtn[1] = ay;
+  rtn[2] = az;
   return rtn;
 }

@@ -18,7 +18,12 @@ void setup(){
 }
 
 void loop(){
+	digitalWrite(13,HIGH);
 	watch.run();
+  
+	//Power light. If things are frozen, light should remain on.
+	digitalWrite(13,LOW);
+	delay(50);
 }
 /*
 

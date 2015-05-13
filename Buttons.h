@@ -11,10 +11,10 @@
 class Buttons
 {
 private:
-  bool btn1, btn2; //Button values
-  bool lbtn1, lbtn2; //Last values
-  bool btn1rel, btn2rel; //Was released
-  bool bothbtnrel; //Both buttons released
+  bool btn1=false, btn2=false; //Button values
+  bool lbtn1=false, lbtn2=false; //Last values
+  bool btn1rel=false, btn2rel=false; //Was released
+  bool bothbtnrel=false; //Both buttons released
 public:
   Buttons();
   void init();
