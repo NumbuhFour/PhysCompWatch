@@ -4,6 +4,7 @@
 ClockState::ClockState(Lilywatch * lw): WatchState(lw){
   col = lw->getColors();
   btn = lw->getButtons();
+  showClock = true;
 }
 void ClockState::start(){ //State switched to this
   showClock = true;
