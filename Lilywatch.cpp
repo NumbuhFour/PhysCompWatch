@@ -5,6 +5,7 @@
 #include "ClockState.h"
 #include "SetClockState.h"
 #include "ConfigState.h"
+#include "FlashlightState.h"
 
 Lilywatch::Lilywatch(): fakeSerial(7,8){
   cfg = new Config(this);
@@ -24,6 +25,7 @@ Lilywatch::Lilywatch(): fakeSerial(7,8){
   selState = new SelectorState(this);
   states[0] = new ClockState(this);
   states[1] = new ButtonPlayState(this);
+  states[3] = new FlashlightState(this);
   states[4] = new ConfigState(this);
   states[5] = new SetClockState(this);
 }

@@ -135,18 +135,6 @@ void compassState(){
   compassDirection(compassReading);
 }
 
-void flashlight(){
-  if(genNum == 0){
-    float previousBrightness = ledStrength;
-    ledStrength = 1;
-    setColors(127, 255,255,255);
-    pushColors();
-    ledStrength = previousBrightness;
-    genNum = 1;//Used to make sure this doesn't happen twice
-  }
-  
-}
-
 void setBrightnessState(){
   if(bothbtnrel){ //Confirmation with both buttons
     confirmFlash();
