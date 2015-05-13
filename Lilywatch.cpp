@@ -11,6 +11,9 @@
 #include "ShowBatteryState.h"
 #include "ScreensaverState.cpp"
 
+
+#include "LightLevelDaemon.cpp"
+
 Lilywatch::Lilywatch(): fakeSerial(7,8){
   cfg = new Config(this);
   colors = new Colors(this);
@@ -36,6 +39,9 @@ Lilywatch::Lilywatch(): fakeSerial(7,8){
   states[6] = new SetBrightnessState(this);
   states[7] = new ScreensaverState(this);
   states[8] = new AlarmState(this);
+  
+  //Daemons
+  daemons[0] = new LightLevelDaemon(this);
 }
 
 void Lilywatch::setup(){
@@ -102,19 +108,19 @@ void Lilywatch::run(){
   
   loopState();
   
-  /*if(batteryLevel < 0.2 && (configFlags & CONFIG_BATTWARN)==CONFIG_BATTWARN && millis()%4000 < 1000){
-    displayBatteryColors();
-    pushColors();
+  if(battery->getData() < 0.2 && cfg->checkFlag(CONFIG_BATTWARN) && millis()%4000 < 1000){
+    colors->displayBatteryColors();
+    colors->pushColors();
     
-    pulseMotor(1023, 200);
+    motor->pulseMotor(1023, 200);
     delay(50);
     
-    pulseMotor(1023, 700);
+    motor->pulseMotor(1023, 700);
     delay(300);
     
   }else if(messageWaiting && millis()%4000 < 1000){
-    messageFlash();
-  }*/
+    colors->messageFlash();
+  }
   
   loopDaemons();
   
@@ -141,7 +147,11 @@ void Lilywatch::loopState(){
 }
 
 void Lilywatch::loopDaemons(){
-  
+  for(byte i = 0; i < DAEMONS; i++){
+    Daemon * d = daemons[i];
+    if(d != 0)
+      d->run();
+  }
 }
 
 //Handles switching between state

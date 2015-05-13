@@ -163,27 +163,6 @@ void unityState(){
 
 / ************************************************** DAEMONS ************************************************** /
 
-float lastLightLevel[3];
-byte lastLightLevelIndex = 0;
-void autoLightLevel(){
-  if((configFlags & CONFIG_LIGHTLEVEL) != CONFIG_LIGHTLEVEL) 
-    return; //Auto light level disabled
-  
-  float light = checkLightLevel();
-  lastLightLevel[lastLightLevelIndex] = light;
-  lastLightLevelIndex = (lastLightLevelIndex+1)%3;
-  
-  light = 0;
-  for(byte i = 0; i < 3; i++){
-    light += lastLightLevel[i];
-  }
-  light /= 3;
-  
-  if(light < 0.05) light = 0.05;
-  if(light > 1) light = 1;
-  ledStrength = light;
-}
-
 String msgBuild = "";
 void checkBluetooth(){
 //  fakeSerial.println("Checky");
