@@ -135,12 +135,6 @@ void compassState(){
   compassDirection(compassReading);
 }
 
-void showBatteryState(){
-  displayBatteryColors();
-  Serial.print("Battery ");
-  Serial.println(batteryLevel);
-}
-
 void androidState(){
   if(btn1rel) Serial.println("btn1");
   if(btn2rel) Serial.println("btn2");

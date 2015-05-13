@@ -8,6 +8,8 @@
 #include "FlashlightState.h"
 #include "AlarmState.h"
 #include "SetBrightnessState.h"
+#include "ShowBatteryState.h"
+#include "ScreensaverState.cpp"
 
 Lilywatch::Lilywatch(): fakeSerial(7,8){
   cfg = new Config(this);
@@ -27,10 +29,12 @@ Lilywatch::Lilywatch(): fakeSerial(7,8){
   selState = new SelectorState(this);
   states[0] = new ClockState(this);
   states[1] = new ButtonPlayState(this);
+  states[2] = new ShowBatteryState(this);
   states[3] = new FlashlightState(this);
   states[4] = new ConfigState(this);
   states[5] = new SetClockState(this);
   states[6] = new SetBrightnessState(this);
+  states[7] = new ScreensaverState(this);
   states[8] = new AlarmState(this);
 }
 
