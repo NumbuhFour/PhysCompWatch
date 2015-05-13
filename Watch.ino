@@ -135,27 +135,6 @@ void compassState(){
   compassDirection(compassReading);
 }
 
-void setBrightnessState(){
-  if(bothbtnrel){ //Confirmation with both buttons
-    confirmFlash();
-    setState(CLOCK_STATE);
-  }else{
-    if(btn1rel && ledStrength < 1){ //left button released
-      ledStrength += 0.05;
-    } 
-    if(btn2rel && ledStrength > 0.05){ //right button released
-      ledStrength -= 0.05;
-    }
-    setColors(127,255,255,255);
-    setColor(0, 255,0,0);
-    setColor(3, 0,255,0);
-    setColor(6, 0,0,255);
-    
-    if(ledStrength < 0.05) ledStrength = 0.05;
-    if(ledStrength > 1) ledStrength = 1;
-  }
-}
-
 void showBatteryState(){
   displayBatteryColors();
   Serial.print("Battery ");
