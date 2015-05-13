@@ -1,6 +1,6 @@
 /*
   FlashlightState.h - Flashlight app for the Lilywatch
-  Shows a white LED in the direction of north
+  Shines a bright light
 */
 
 #ifndef FlashlightState_h
