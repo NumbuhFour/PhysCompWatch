@@ -47,7 +47,7 @@ Battery:
 	Init
 	Check
 	getData();
-	
+
 Colors(Lilywatch)(
 	setColor
 	setColors
@@ -57,3 +57,13 @@ Colors(Lilywatch)(
 	warningFlash
 	errorFlash
 	
+
+States:
+	Compass
+	Show battery
+	AndroidState
+	Unity state
+	
+Daemons:
+	Check Bluetooth
+	Check brightness
