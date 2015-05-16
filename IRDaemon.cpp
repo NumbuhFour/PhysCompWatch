@@ -13,8 +13,8 @@ bool IRDaemon::run() { //Loop
   unsigned long time = millis();
   if(time-lastCheck > 150 && irrecv.decode(&results)){
       lastCheck = time; //IR Detection gets wonky without a 100ms delay
-      Serial.print("GET IRh: ");
-      Serial.println(results.value, HEX);
+      //Serial.print("GET IRh: ");
+      //Serial.println(results.value, HEX);
       irrecv.resume();
       for(byte i = 0; i < NUM_VALID_IR; i++){
         if(validSignals[i] == results.value){

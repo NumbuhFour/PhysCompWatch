@@ -12,7 +12,7 @@
 #define IRSEN_PIN   9
 
 #define STATES      10
-#define DAEMONS     3
+#define DAEMONS     4
 
 #define CLOCK_STATE 0
 #define ALARM_STATE 64
@@ -24,6 +24,7 @@
 #define CONFIG_BLUETOOTH  2 	//Pay attention to bluetooth messages
 #define CONFIG_BATTWARN   4 	//Warn when battery low
 #define CONFIG_ACCELRTN   8 	//Go to clock by shake
+#define CONFIG_IRCONTEXT 16 	//Do things based on context observed by IR
 #define DATA_START 32
 
 #define VCCMIN   3.4           // Minimum expected Vcc level, in Volts.

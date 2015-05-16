@@ -15,6 +15,7 @@
 #include "LightLevelDaemon.cpp"
 #include "BluetoothDaemon.cpp"
 #include "IRDaemon.h"
+#include "IRContextDaemon.cpp"
 
 Lilywatch::Lilywatch(): fakeSerial(7,8){
   cfg = new Config(this);
@@ -63,6 +64,7 @@ void Lilywatch::setup(){
   daemons[1] = new BluetoothDaemon(this);
   ir = new IRDaemon(this);
   daemons[2] = ir;
+  daemons[3] = new IRContextDaemon(this);
   
   lastMin = minute();
   
