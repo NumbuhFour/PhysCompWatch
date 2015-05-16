@@ -12,7 +12,6 @@
 #include "Arduino.h"
 #include "Daemon.h"
 #include "Lilywatch.h"
-#include "Config.h"
 
 #define NUM_VALID_IR 1
 class Lilywatch;
@@ -21,7 +20,6 @@ class IRDaemon: public Daemon
 {
   public:
     IRDaemon(Lilywatch * lw): Daemon(lw), irrecv(IRSEN_PIN) {
-      cfg = lw->getConfig();
       irrecv.enableIRIn();
       validSignals[0] = 4045713590;
       signalKeys[0] = "tv";
@@ -47,8 +45,11 @@ class IRDaemon: public Daemon
         lastValidTime = 0;
       }
     }
+    
+    String getCurrentKey(){
+      return lastValid;
+    }
   private:
-    Config * cfg;
     IRrecv irrecv;
     decode_results results;
     unsigned long validSignals[NUM_VALID_IR];
