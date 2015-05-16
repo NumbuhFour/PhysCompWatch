@@ -61,7 +61,8 @@ void Lilywatch::setup(){
   //Daemons
   daemons[0] = new LightLevelDaemon(this);
   daemons[1] = new BluetoothDaemon(this);
-  daemons[2] = new IRDaemon(this);
+  ir = new IRDaemon(this);
+  daemons[2] = ir;
   
   lastMin = minute();
   
@@ -221,4 +222,7 @@ Light* Lilywatch::getLight(){
 }
 Battery* Lilywatch::getBattery(){
   return battery;
+}
+IRDaemon* Lilywatch::getIR(){
+  return ir;
 }

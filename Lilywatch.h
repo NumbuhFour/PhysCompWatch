@@ -15,6 +15,7 @@
 #include "Buttons.h"
 #include "Light.h"
 #include "Battery.h"
+#include "IRDaemon.h"
 
 #include "SelectorState.h"
 
@@ -36,6 +37,7 @@ class Lilywatch
     Buttons* getButtons();
     Light* getLight();
     Battery* getBattery();
+    IRDaemon* getIR();
     
     void setMessageWaiting(bool);
   private:
@@ -49,6 +51,7 @@ class Lilywatch
     Config * cfg;
     Colors * colors;
     Motor * motor;
+    IRDaemon * ir;
     
     //Sensors
     Accel * accel;
