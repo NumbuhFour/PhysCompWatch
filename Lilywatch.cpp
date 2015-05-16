@@ -14,7 +14,7 @@
 
 #include "LightLevelDaemon.cpp"
 #include "BluetoothDaemon.cpp"
-#include "IRDaemon.cpp"
+#include "IRDaemon.h"
 
 Lilywatch::Lilywatch(): fakeSerial(7,8){
   cfg = new Config(this);
@@ -111,7 +111,9 @@ void Lilywatch::run(){
   
   if(btn->btnDown(0) || btn->btnDown(1)) messageWaiting = false;
   
-  loopState();
+  if(!loopDaemons()){
+    loopState();
+  }
   
   if(battery->getData() < 0.2 && cfg->checkFlag(CONFIG_BATTWARN) && millis()%4000 < 1000){
     colors->displayBatteryColors();
@@ -126,8 +128,6 @@ void Lilywatch::run(){
   }else if(messageWaiting && millis()%4000 < 1000){
     colors->messageFlash();
   }
-  
-  loopDaemons();
   
   //Keep clock mostly up to date in EEPROM
   //So if theres a reset, we wont be too far behind
@@ -151,12 +151,14 @@ void Lilywatch::loopState(){
   }
 }
 
-void Lilywatch::loopDaemons(){
+bool Lilywatch::loopDaemons(){
+  bool doSkip = false;
   for(byte i = 2; i < DAEMONS; i++){
     Daemon * d = daemons[i];
     if(d != 0)
-      d->run();
+      doSkip |= d->run();
   }
+  return doSkip;
 }
 
 //Handles switching between state

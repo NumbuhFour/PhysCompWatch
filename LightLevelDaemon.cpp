@@ -30,10 +30,10 @@ class LightLevelDaemon: public Daemon
       col = lw->getColors();
       lht = lw->getLight();
     }
-    virtual void run() { //Loop
+    virtual bool run() { //Loop
       
       if(!cfg->checkFlag(CONFIG_LIGHTLEVEL))
-        return; //Auto light level disabled
+        return false; //Auto light level disabled
       
       lht->check();
       float light = lht->getData();
@@ -49,6 +49,7 @@ class LightLevelDaemon: public Daemon
       if(light < 0.05) light = 0.05;
       if(light > 1) light = 1;
       col->setStrength(light);
+      return false;
     }
 };
 

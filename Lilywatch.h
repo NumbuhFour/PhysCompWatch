@@ -16,6 +16,7 @@
 #include "Light.h"
 #include "Battery.h"
 #include "IRDaemon.h"
+class IRDaemon;
 
 #include "SelectorState.h"
 
@@ -42,7 +43,7 @@ class Lilywatch
     void setMessageWaiting(bool);
   private:
     void loopState(); // Let's the current app run
-    void loopDaemons(); // Daemons always run
+    bool loopDaemons(); // Daemons always run
   
     WatchState * states[STATES] = {0};
     Daemon * daemons[DAEMONS] = {0};

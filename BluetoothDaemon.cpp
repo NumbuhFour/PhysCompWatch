@@ -24,7 +24,7 @@ class BluetoothDaemon: public Daemon
       col = lw->getColors();
       msgBuild = "";
     }
-    void run() { //Loop
+    bool run() { //Loop
       while(Serial.available()>0){
         char c = (char)Serial.read();
         Serial.print(c);
@@ -36,6 +36,7 @@ class BluetoothDaemon: public Daemon
           msgBuild.concat(c);
         }
       }
+      return false;
     }
   private:
     Config * cfg;

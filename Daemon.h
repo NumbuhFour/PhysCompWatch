@@ -17,7 +17,7 @@ class Daemon
   public:
     explicit
     Daemon(Lilywatch * lw): watch(lw) {}
-    virtual void run() =0; //Loop
+    virtual bool run() =0; //Loop. Returns true if main loop should skip letting current app act
 };
 
 #endif
