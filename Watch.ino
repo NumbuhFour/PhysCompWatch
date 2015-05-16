@@ -1,3 +1,6 @@
+#include <IRremote.h>
+#include <IRremoteInt.h>
+
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_LSM303_U.h>
@@ -11,6 +14,7 @@
 
 Lilywatch watch;
 
+decode_results results;
 void setup(){
 	watch.setup();
 }

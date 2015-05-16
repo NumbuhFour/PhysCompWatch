@@ -14,6 +14,7 @@
 
 #include "LightLevelDaemon.cpp"
 #include "BluetoothDaemon.cpp"
+#include "IRDaemon.cpp"
 
 Lilywatch::Lilywatch(): fakeSerial(7,8){
   cfg = new Config(this);
@@ -28,22 +29,6 @@ Lilywatch::Lilywatch(): fakeSerial(7,8){
   battery = new Battery();
   
   this->state = 0;
-  
-  //Making states
-  selState = new SelectorState(this);
-  states[0] = new ClockState(this);
-  states[1] = new ButtonPlayState(this);
-  states[2] = new FlashlightState(this);
-  states[3] = new ShowBatteryState(this);
-  states[4] = new ConfigState(this);
-  states[5] = new SetClockState(this);
-  states[6] = new SetBrightnessState(this);
-  states[7] = new ScreensaverState(this);
-  states[8] = new AlarmState(this);
-  
-  //Daemons
-  daemons[0] = new LightLevelDaemon(this);
-  daemons[1] = new BluetoothDaemon(this);
 }
 
 void Lilywatch::setup(){
@@ -60,6 +45,23 @@ void Lilywatch::setup(){
   btn->init();
   light->init();
   battery->init();
+  
+  //Making states
+  selState = new SelectorState(this);
+  states[0] = new ClockState(this);
+  states[1] = new ButtonPlayState(this);
+  states[2] = new FlashlightState(this);
+  states[3] = new ShowBatteryState(this);
+  states[4] = new ConfigState(this);
+  states[5] = new SetClockState(this);
+  states[6] = new SetBrightnessState(this);
+  states[7] = new ScreensaverState(this);
+  states[8] = new AlarmState(this);
+  
+  //Daemons
+  daemons[0] = new LightLevelDaemon(this);
+  daemons[1] = new BluetoothDaemon(this);
+  daemons[2] = new IRDaemon(this);
   
   lastMin = minute();
   
@@ -106,7 +108,7 @@ void Lilywatch::run(){
   }
   accelReturnDelay = max(accelReturnDelay-tickDelay,0);
   
-  //if(btn->btnDown(0) || btn->btnDown(1)) messageWaiting = false;
+  if(btn->btnDown(0) || btn->btnDown(1)) messageWaiting = false;
   
   loopState();
   
@@ -149,7 +151,7 @@ void Lilywatch::loopState(){
 }
 
 void Lilywatch::loopDaemons(){
-  for(byte i = 0; i < DAEMONS; i++){
+  for(byte i = 2; i < DAEMONS; i++){
     Daemon * d = daemons[i];
     if(d != 0)
       d->run();

@@ -12,7 +12,7 @@
 #define IRSEN_PIN   9
 
 #define STATES      10
-#define DAEMONS     2
+#define DAEMONS     3
 
 #define CLOCK_STATE 0
 #define ALARM_STATE 64
