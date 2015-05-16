@@ -155,7 +155,7 @@ void Lilywatch::loopState(){
 
 bool Lilywatch::loopDaemons(){
   bool doSkip = false;
-  for(byte i = 2; i < DAEMONS; i++){
+  for(byte i = 0; i < DAEMONS; i++){
     Daemon * d = daemons[i];
     if(d != 0)
       doSkip |= d->run();
