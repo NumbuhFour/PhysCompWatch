@@ -21,9 +21,15 @@ void Buttons::check(){
   
   lbtn1 = btn1;
   lbtn2 = btn2;
+  cleared = false;
+}
+void Buttons::clear(){
+  cleared = true;
 }
   
 bool Buttons::btnDown(int btn){ //0 or 1 for respective buttons, 2 for both
+  if(cleared) return false;
+  
   switch(btn){
     case 0: return btn1;
     case 1: return btn2;
@@ -32,6 +38,8 @@ bool Buttons::btnDown(int btn){ //0 or 1 for respective buttons, 2 for both
   }
 }
 bool Buttons::btnRel(int btn){
+  if(cleared) return false;
+  
   switch(btn){
     case 0: return btn1rel;
     case 1: return btn2rel;
