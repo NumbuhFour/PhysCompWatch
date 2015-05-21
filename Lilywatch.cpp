@@ -57,7 +57,7 @@ void Lilywatch::setup(){
   states[5] = new SetClockState(this);
   states[6] = new SetBrightnessState(this);
   states[7] = new ScreensaverState(this);
-  states[63] = new AlarmState(this);
+  states[ALARM_STATE] = new AlarmState(this);
   
   //Daemons
   daemons[0] = new LightLevelDaemon(this);
